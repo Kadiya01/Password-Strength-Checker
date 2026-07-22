@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  USER
+  ADMIN
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        RoleName @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model User {
+  id                String               @id @default(uuid())
+  email             String               @unique
+  username          String               @unique
+  passwordHash      String
+  firstName         String?
+  lastName          String?
+  isActive          Boolean              @default(true)
+  isLocked          Boolean              @default(false)
+  failedAttempts    Int                  @default(0)
+  lockUntil         DateTime?
+  lastLoginAt       DateTime?
+  refreshToken      String?
+  refreshTokenExpAt DateTime?
+  roleId            String
+  role              Role                 @relation(fields: [roleId], references: [id])
+  passwordLogs      PasswordLog[]
+  loginHistories    LoginHistory[]
+  passwordResetTokens PasswordResetToken[]
+  securityEvents    SecurityEvent[]
+  deletedAt         DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([email])
+  @@index([username])
+  @@index([roleId])
+  @@index([isActive, isLocked])
+  @@map("users")
+}
+
+model PasswordLog {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  strengthScore Int
+  strengthLabel String
+  hasUppercase  Boolean
+  hasLowercase  Boolean
+  hasNumbers    Boolean
+  hasSymbols    Boolean
+  entropy       Float
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("password_logs")
+}
+
+model LoginHistory {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  ipAddress     String
+  userAgent     String
+  success       Boolean
+  failureReason String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([success])
+  @@map("login_history")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([token])
+  @@map("password_reset_tokens")
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  eventType String
+  ipAddress String
+  userAgent String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([eventType])
+  @@map("security_events")
+}
