@@ -42,3 +42,81 @@ export interface PasswordLogEntry {
   entropy: number;
   createdAt: Date;
 }
+
+export interface PasswordAnalysisResult {
+  score: number;
+  strength: string;
+  entropy: number;
+  crackTime: string;
+  passphrase: boolean;
+  checks: PasswordChecks;
+  suggestions: string[];
+}
+
+export interface PasswordChecks {
+  length: boolean;
+  uppercase: boolean;
+  lowercase: boolean;
+  numbers: boolean;
+  symbols: boolean;
+  dictionary: boolean;
+  keyboardPattern: boolean;
+  sequence: boolean;
+  repeated: boolean;
+}
+
+export interface EntropyResult {
+  bits: number;
+  poolSize: number;
+  searchSpace: string;
+  algorithm: string;
+}
+
+export interface CrackTimes {
+  offline: string;
+  online: string;
+  gpu: string;
+  dictionary: string;
+}
+
+export interface DictionaryCheckResult {
+  found: boolean;
+  matched: string | null;
+}
+
+export interface LeetCheckResult {
+  normalized: string;
+  isLeet: boolean;
+}
+
+export interface KeyboardPatternResult {
+  found: boolean;
+  patterns: string[];
+}
+
+export interface SequenceCheckResult {
+  found: boolean;
+  types: string[];
+  patterns: string[];
+}
+
+export interface PatternCheckResult {
+  keyboardPattern: boolean;
+  sequence: boolean;
+  repeated: boolean;
+  patterns: string[];
+}
+
+export interface ScoringInput {
+  length: number;
+  entropy: number;
+  isPassphrase: boolean;
+  dictionaryHit: boolean;
+  keyboardPattern: boolean;
+  sequence: boolean;
+  repeated: boolean;
+  hasUppercase: boolean;
+  hasLowercase: boolean;
+  hasNumbers: boolean;
+  hasSymbols: boolean;
+}

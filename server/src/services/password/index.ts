@@ -1,0 +1,11 @@
+export { checkPasswordStrength, toStrengthResult } from "./password-strength.service";
+export { calculateEntropy } from "./entropy-calculator.service";
+export { checkDictionary } from "./dictionary-checker.service";
+export { detectLeetspeak } from "./leetspeak-detector.service";
+export { detectKeyboardPattern } from "./keyboard-pattern-detector.service";
+export { detectSequence } from "./sequence-detector.service";
+export { detectPatterns } from "./pattern-detector.service";
+export { calculateScore, getStrengthLabel } from "./scoring-engine.service";
+export { estimateCrackTime, estimateCrackTimes } from "./crack-time-estimator.service";
+export { generateSuggestions } from "./suggestion.service";
+export { formatReport } from "./report-formatter.service";

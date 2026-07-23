@@ -105,20 +105,26 @@ const swaggerOptions: Options = {
         StrengthResult: {
           type: "object",
           properties: {
-            score: { type: "integer", minimum: 0, maximum: 100 },
-            label: { type: "string", enum: ["Very Weak", "Weak", "Fair", "Strong", "Very Strong"] },
-            details: {
+            score: { type: "integer", minimum: 0, maximum: 100, example: 92 },
+            strength: { type: "string", enum: ["Very Weak", "Weak", "Fair", "Good", "Strong", "Excellent"], example: "Strong" },
+            entropy: { type: "number", example: 78.3 },
+            crackTime: { type: "string", example: "Estimated 540 years" },
+            passphrase: { type: "boolean", example: false },
+            checks: {
               type: "object",
               properties: {
-                hasUppercase: { type: "boolean" },
-                hasLowercase: { type: "boolean" },
-                hasNumbers: { type: "boolean" },
-                hasSymbols: { type: "boolean" },
-                length: { type: "integer" },
-                entropy: { type: "number" },
+                length: { type: "boolean" },
+                uppercase: { type: "boolean" },
+                lowercase: { type: "boolean" },
+                numbers: { type: "boolean" },
+                symbols: { type: "boolean" },
+                dictionary: { type: "boolean" },
+                keyboardPattern: { type: "boolean" },
+                sequence: { type: "boolean" },
+                repeated: { type: "boolean" },
               },
             },
-            recommendations: { type: "array", items: { type: "string" } },
+            suggestions: { type: "array", items: { type: "string" } },
           },
         },
         GenerateRequest: {

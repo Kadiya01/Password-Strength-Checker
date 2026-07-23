@@ -1,15 +1,15 @@
-import { GenerateInput, GenerateResult, PasswordLogEntry } from "@/interfaces";
+import { GenerateInput, PasswordLogEntry, PasswordAnalysisResult } from "@/interfaces";
 import { passwordRepository } from "@/repositories/password.repository";
-import { checkPasswordStrength } from "./password-strength.service";
+import { checkPasswordStrength, toStrengthResult } from "@/services/password";
 import { generatePassword as generate } from "@/utils/passwordGenerator";
 import { parsePagination } from "@/interfaces";
 
 export class PasswordService {
-  checkStrength(password: string) {
+  checkStrength(password: string): PasswordAnalysisResult {
     return checkPasswordStrength(password);
   }
 
-  generate(options: GenerateInput): GenerateResult {
+  generate(options: GenerateInput) {
     const password = generate({
       length: options.length,
       includeUppercase: options.includeUppercase,
@@ -19,21 +19,22 @@ export class PasswordService {
       excludeAmbiguous: options.excludeAmbiguous,
     });
 
-    const strength = checkPasswordStrength(password);
+    const analysis = checkPasswordStrength(password);
+    const strength = toStrengthResult(analysis, password);
 
     return { password, strength };
   }
 
-  async logStrengthCheck(userId: string, result: ReturnType<typeof checkPasswordStrength>): Promise<void> {
+  async logStrengthCheck(userId: string, result: PasswordAnalysisResult): Promise<void> {
     await passwordRepository.createLog({
       userId,
       strengthScore: result.score,
-      strengthLabel: result.label,
-      hasUppercase: result.details.hasUppercase,
-      hasLowercase: result.details.hasLowercase,
-      hasNumbers: result.details.hasNumbers,
-      hasSymbols: result.details.hasSymbols,
-      entropy: result.details.entropy,
+      strengthLabel: result.strength,
+      hasUppercase: result.checks.uppercase,
+      hasLowercase: result.checks.lowercase,
+      hasNumbers: result.checks.numbers,
+      hasSymbols: result.checks.symbols,
+      entropy: result.entropy,
     });
   }
 
