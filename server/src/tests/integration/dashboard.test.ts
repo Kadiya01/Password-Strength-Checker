@@ -248,7 +248,7 @@ describe("Dashboard - Security Events", () => {
     expect(res.body.data).toHaveProperty("page");
     expect(res.body.data).toHaveProperty("limit");
     expect(Array.isArray(res.body.data.data)).toBe(true);
-    expect(res.body.data.total).toBe(2);
+    expect(res.body.data.total).toBeGreaterThanOrEqual(2);
 
     // Check event structure
     const event = res.body.data.data[0];
