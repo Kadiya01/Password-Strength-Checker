@@ -41,9 +41,9 @@ export class AuthRepository {
     });
   }
 
-  async findUserByRefreshToken(refreshToken: string) {
-    return prisma.user.findFirst({
-      where: { refreshToken },
+  async findUserById(userId: string) {
+    return prisma.user.findUnique({
+      where: { id: userId },
       include: { role: true },
     });
   }

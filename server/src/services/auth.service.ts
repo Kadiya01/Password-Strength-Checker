@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { JwtPayload } from "jsonwebtoken";
-import { RegisterInput, LoginInput, AuthResponse, RequestMetadata, ForgotPasswordInput, ResetPasswordInput } from "@/interfaces";
+import { RegisterInput, LoginInput, AuthResponse, RequestMetadata, ForgotPasswordInput, ResetPasswordInput, ChangePasswordInput, VerifyEmailInput } from "@/interfaces";
 import { authRepository } from "@/repositories/auth.repository";
 import { hashService } from "./hash.service";
 import { tokenService } from "./token.service";
@@ -9,6 +9,8 @@ import { logSecurityEvent, logLoginHistory } from "@/security/securityEvents";
 import { BadRequestError, UnauthorizedError, ConflictError, LockedError } from "@/utils/ApiError";
 import { RoleName } from "@prisma/client";
 import prisma from "@/config/database.config";
+import { checkPasswordStrength } from "@/services/password";
+import { emailService } from "./email.service";
 
 export class AuthService {
   async register(input: RegisterInput, metadata: RequestMetadata): Promise<AuthResponse> {
@@ -20,6 +22,11 @@ export class AuthService {
     const existingUsername = await authRepository.findByUsername(input.username);
     if (existingUsername) {
       throw new ConflictError("Username is already taken");
+    }
+
+    const passwordAnalysis = checkPasswordStrength(input.password);
+    if (passwordAnalysis.strength === "Very Weak" || passwordAnalysis.strength === "Weak") {
+      throw new BadRequestError("Password is too weak. Please choose a stronger password.");
     }
 
     const passwordHash = await hashService.hash(input.password);
@@ -52,6 +59,17 @@ export class AuthService {
     await authRepository.updateRefreshToken(user.id, hashedRefreshToken, refreshExpiry);
 
     await logSecurityEvent(user.id, "REGISTER", metadata.ipAddress, metadata.userAgent);
+
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerificationToken: verificationToken,
+        emailVerificationExpires: verificationExpires,
+      },
+    });
+    await emailService.sendVerificationEmail(user.email, verificationToken);
 
     return {
       user: {
@@ -140,7 +158,7 @@ export class AuthService {
     }
 
     const userId = decoded.sub as string;
-    const user = await authRepository.findUserByRefreshToken(userId);
+    const user = await authRepository.findUserById(userId);
     if (!user || !user.refreshToken) {
       throw new UnauthorizedError("Invalid refresh token");
     }
@@ -148,6 +166,12 @@ export class AuthService {
     if (user.refreshTokenExpAt && user.refreshTokenExpAt <= new Date()) {
       await authRepository.updateRefreshToken(userId, null, null);
       throw new UnauthorizedError("Refresh token has expired");
+    }
+
+    const isTokenValid = await hashService.compare(refreshToken, user.refreshToken);
+    if (!isTokenValid) {
+      await authRepository.updateRefreshToken(userId, null, null);
+      throw new UnauthorizedError("Invalid refresh token");
     }
 
     const newAccessToken = tokenService.signAccessToken({
@@ -177,7 +201,7 @@ export class AuthService {
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     await authRepository.createResetToken(user.id, resetToken, expiresAt);
 
@@ -200,6 +224,11 @@ export class AuthService {
       throw new BadRequestError("Invalid or expired reset token");
     }
 
+    const passwordAnalysis = checkPasswordStrength(input.newPassword);
+    if (passwordAnalysis.strength === "Very Weak" || passwordAnalysis.strength === "Weak") {
+      throw new BadRequestError("Password is too weak. Please choose a stronger password.");
+    }
+
     const passwordHash = await hashService.hash(input.newPassword);
     await authRepository.updatePassword(resetTokenRecord.userId, passwordHash);
     await authRepository.markTokenUsed(input.token);
@@ -211,6 +240,57 @@ export class AuthService {
       "system",
       "password-reset-flow",
     );
+  }
+
+  async changePassword(userId: string, input: ChangePasswordInput, metadata: RequestMetadata): Promise<void> {
+    const user = await authRepository.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedError("User not found");
+    }
+
+    const isCurrentValid = await hashService.compare(input.currentPassword, user.passwordHash);
+    if (!isCurrentValid) {
+      throw new UnauthorizedError("Current password is incorrect");
+    }
+
+    if (input.currentPassword === input.newPassword) {
+      throw new BadRequestError("New password must be different from current password");
+    }
+
+    const passwordAnalysis = checkPasswordStrength(input.newPassword);
+    if (passwordAnalysis.strength === "Very Weak" || passwordAnalysis.strength === "Weak") {
+      throw new BadRequestError("New password is too weak. Please choose a stronger password.");
+    }
+
+    const passwordHash = await hashService.hash(input.newPassword);
+    await authRepository.updatePassword(userId, passwordHash);
+    await authRepository.updateRefreshToken(userId, null, null);
+
+    await logSecurityEvent(userId, "PASSWORD_CHANGED", metadata.ipAddress, metadata.userAgent);
+  }
+
+  async verifyEmail(input: VerifyEmailInput): Promise<void> {
+    const user = await prisma.user.findFirst({
+      where: {
+        emailVerificationToken: input.token,
+        emailVerificationExpires: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestError("Invalid or expired verification token");
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isEmailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      },
+    });
+
+    await logSecurityEvent(user.id, "EMAIL_VERIFIED", "system", "email-verification-flow");
   }
 }
 

@@ -8,6 +8,8 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  changePasswordSchema,
+  verifyEmailSchema,
 } from "@/validators/auth.validator";
 
 const router = Router();
@@ -182,5 +184,89 @@ router.post("/forgot-password", authRateLimiter, validate(forgotPasswordSchema),
  *         description: Too many requests
  */
 router.post("/reset-password", authRateLimiter, validate(resetPasswordSchema), authController.resetPassword);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   put:
+ *     tags: [Auth]
+ *     summary: Change password
+ *     description: Change the authenticated user's password. Requires current password and validates the new password against the Password Intelligence Engine.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 128
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Validation failed or new password too weak
+ *       401:
+ *         description: Authentication required or current password incorrect
+ */
+router.put("/change-password", authenticate, validate(changePasswordSchema), authController.changePassword);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Verify email address
+ *     description: Verify a user's email address using the token sent during registration.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token]
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired verification token
+ */
+router.post("/verify-email", validate(verifyEmailSchema), authController.verifyEmail);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Get current user
+ *     description: Retrieve the authenticated user's profile information.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/UserProfile'
+ *       401:
+ *         description: Authentication required
+ */
+router.get("/me", authenticate, authController.getMe);
 
 export default router;

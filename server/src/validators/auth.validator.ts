@@ -72,3 +72,22 @@ export const resetPasswordSchema = [
     .isLength({ min: 8, max: 128 })
     .withMessage("Password must be between 8 and 128 characters"),
 ];
+
+export const changePasswordSchema = [
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required"),
+  body("newPassword")
+    .notEmpty()
+    .withMessage("New password is required")
+    .isLength({ min: 8, max: 128 })
+    .withMessage("New password must be between 8 and 128 characters"),
+];
+
+export const verifyEmailSchema = [
+  body("token")
+    .notEmpty()
+    .withMessage("Verification token is required")
+    .isString()
+    .withMessage("Token must be a string"),
+];

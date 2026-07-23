@@ -23,8 +23,12 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, jwtConfig.secret) as AuthenticatedUser;
-    req.user = decoded;
+    const decoded = jwt.verify(token, jwtConfig.secret) as jwt.JwtPayload;
+    req.user = {
+      id: decoded.sub as string,
+      email: decoded.email as string,
+      role: decoded.role as string,
+    };
     next();
   } catch {
     return next(new UnauthorizedError("Invalid or expired token"));

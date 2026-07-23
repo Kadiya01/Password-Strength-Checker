@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { authService } from "@/services/auth.service";
+import { userService } from "@/services/user.service";
 import { ApiResponse } from "@/utils/ApiResponse";
 
 export class AuthController {
@@ -32,6 +33,7 @@ export class AuthController {
       ApiResponse.success(res, 200, "Login successful", {
         user: result.user,
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       });
     } catch (error) {
       next(error);
@@ -73,6 +75,7 @@ export class AuthController {
 
       ApiResponse.success(res, 200, "Token refreshed successfully", {
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
       });
     } catch (error) {
       next(error);
@@ -96,6 +99,36 @@ export class AuthController {
     try {
       await authService.resetPassword(req.body);
       ApiResponse.success(res, 200, "Password has been reset successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      await authService.changePassword(req.user!.id, req.body, {
+        ipAddress: req.ip ?? "unknown",
+        userAgent: req.get("user-agent") ?? "unknown",
+      });
+      ApiResponse.success(res, 200, "Password changed successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      await authService.verifyEmail(req.body);
+      ApiResponse.success(res, 200, "Email verified successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const profile = await userService.getProfile(req.user!.id);
+      ApiResponse.success(res, 200, "Profile retrieved", profile);
     } catch (error) {
       next(error);
     }
