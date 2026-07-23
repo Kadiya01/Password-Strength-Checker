@@ -15,7 +15,7 @@ Implements NIST SP 800-63B standards and OWASP credential handling guidelines.
 - **Validation**: express-validator
 - **Security**: Helmet, CORS, express-rate-limit, compression, cookie-parser
 - **Documentation**: Swagger (OpenAPI 3.0)
-- **Testing**: Jest + Supertest
+- **Testing**: Jest + Supertest (429 tests, 33 suites)
 
 ## Project Structure
 
@@ -140,7 +140,8 @@ Key variables:
 | `NODE_ENV` | Environment mode | `development` |
 | `PORT` | Server port | `3000` |
 | `DATABASE_URL` | MySQL connection string | - |
-| `JWT_SECRET` | Secret for signing JWTs (min 32 chars) | - |
+| `JWT_SECRET` | Secret for signing access tokens (min 32 chars) | - |
+| `JWT_REFRESH_SECRET` | Secret for signing refresh tokens (min 32 chars) | - |
 | `JWT_EXPIRES_IN` | Access token expiry | `15m` |
 | `JWT_REFRESH_EXPIRES_IN` | Refresh token expiry | `7d` |
 | `BCRYPT_ROUNDS` | Password hashing rounds | `12` |
@@ -274,7 +275,7 @@ The system supports `USER` and `ADMIN` roles. Use the `authorize("ADMIN")` middl
 - **Rate Limiting**: Global + per-route rate limiters
 - **Compression**: Gzip response compression
 - **bcrypt**: Password hashing with configurable rounds
-- **JWT**: Short-lived access tokens + long-lived refresh tokens
+- **JWT**: Short-lived access tokens + long-lived refresh tokens with separate secrets
 - **Account Lockout**: Automatic lockout after failed login attempts
 - **Input Validation**: express-validator on all endpoints
 - **SQL Injection Prevention**: Prisma ORM parameterized queries

@@ -19,4 +19,20 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["framer-motion", "lucide-react"],
+          forms: ["react-hook-form", "@hookform/resolvers", "zod"],
+          data: ["@tanstack/react-query", "axios", "zustand"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+    target: "es2022",
+    minify: "esbuild",
+    sourcemap: false,
+  },
 });
