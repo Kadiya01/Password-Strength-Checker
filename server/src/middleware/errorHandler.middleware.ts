@@ -4,7 +4,8 @@ import { ApiResponse } from "@/utils/ApiResponse";
 import { logger } from "@/utils/logger";
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
-  logger.error(`${err.message}`, err.stack);
+  const isDev = process.env.NODE_ENV !== "production";
+  logger.error(`${err.message}`, isDev ? err.stack : undefined);
 
   if (err instanceof ValidationError) {
     ApiResponse.error(res, err.statusCode, err.message, err.errors);

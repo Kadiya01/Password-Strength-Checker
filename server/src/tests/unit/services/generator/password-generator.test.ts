@@ -149,10 +149,15 @@ describe("PasswordGenerator", () => {
         excludeAmbiguous: false,
       });
 
-      const uniqueCharsLower = new Set(lowerOnly.split("")).size;
-      const uniqueCharsAll = new Set(allSets.split("")).size;
+      // With more character sets, the password should contain a wider variety of character types
+      const hasUpper = /[A-Z]/.test(allSets);
+      const hasLower = /[a-z]/.test(allSets);
+      const hasNum = /[0-9]/.test(allSets);
+      const hasSym = /[^A-Za-z0-9]/.test(allSets);
+      expect(hasUpper || hasNum || hasSym).toBe(true);
 
-      expect(uniqueCharsAll).toBeGreaterThanOrEqual(uniqueCharsLower);
+      // Lower-only should only contain lowercase
+      expect(lowerOnly).toMatch(/^[a-z]+$/);
     });
   });
 

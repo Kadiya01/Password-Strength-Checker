@@ -1,0 +1,787 @@
+{
+  "info": {
+    "name": "Password Strength Checker API",
+    "description": "API collection for the Password Strength Checker application. Includes Auth, Password, Dashboard, and User endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Test@12345\",\n  \"confirmPassword\": \"Test@12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Test@12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});",
+                  "pm.test('Save access token', () => {",
+                  "  const r = pm.response.json();",
+                  "  if (r.data && r.data.accessToken) {",
+                  "    pm.environment.set('accessToken', r.data.accessToken);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh-token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "forgot-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "reset-password"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"xxx\",\n  \"password\": \"NewPass@123\",\n  \"confirmPassword\": \"NewPass@123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Password",
+      "item": [
+        {
+          "name": "Check Strength",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/password/check-strength",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "password", "check-strength"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"MyP@ssw0rd\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/password/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "password", "generate"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"length\": 16,\n  \"includeUppercase\": true,\n  \"includeLowercase\": true,\n  \"includeNumbers\": true,\n  \"includeSymbols\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate Passphrase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/password/generate-passphrase",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "password", "generate-passphrase"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wordCount\": 4,\n  \"separator\": \"-\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Password History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/password/history?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "password", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "statistics"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Security Score",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/security-score",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "security-score"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Login History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/login-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "login-history"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Activity Timeline",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/activity-timeline",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "activity-timeline"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Password Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/password-analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "password-analytics"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Chart Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/chart-data",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "chart-data"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Generation Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/generation-stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "generation-stats"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"email\": \"test@example.com\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "pre-request",
+              "script": {
+                "exec": [
+                  "pm.request.headers.add({",
+                  "  key: 'Authorization',",
+                  "  value: 'Bearer ' + pm.environment.get('accessToken')",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is successful', () => {",
+                  "  const r = pm.response.json();",
+                  "  pm.expect(r.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

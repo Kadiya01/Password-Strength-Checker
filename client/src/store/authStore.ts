@@ -15,7 +15,7 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
+      token: null, // Held purely in memory
       isAuthenticated: false,
       setAuth: (user, token) => set({ user, token, isAuthenticated: true }),
       clearAuth: () => set({ user: null, token: null, isAuthenticated: false }),
@@ -26,6 +26,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }), // Persist user info & auth state, but EXCLUDE token
     }
   )
 );

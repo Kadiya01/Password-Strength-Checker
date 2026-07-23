@@ -5,13 +5,12 @@ import { passwordService } from "@/services/passwordService";
 import Button from "@/components/ui/Button";
 import PasswordInput from "@/components/ui/PasswordInput";
 import Card, { CardContent } from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
 import { useDebounce } from "@/hooks/useDebounce";
-import type { StrengthResult } from "@/types/password.types";
+import type { PasswordAnalysisResult } from "@/types/password.types";
 
 export default function StrengthCheckerPage() {
   const [password, setPassword] = useState("");
-  const [result, setResult] = useState<StrengthResult | null>(null);
+  const [result, setResult] = useState<PasswordAnalysisResult | null>(null);
   const debouncedPassword = useDebounce(password, 250);
 
   const mutation = useMutation({
@@ -28,7 +27,7 @@ export default function StrengthCheckerPage() {
   }, [debouncedPassword]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value.slice(0, 128)); // Enforce Max Length 128
+    setPassword(e.target.value.slice(0, 128));
   }, []);
 
   const handlePaste = async () => {
@@ -36,23 +35,19 @@ export default function StrengthCheckerPage() {
       const text = await navigator.clipboard.readText();
       setPassword(text.slice(0, 128));
     } catch {
-      alert("Unable to access clipboard. Please paste manually using Ctrl+V / Cmd+V.");
+      console.warn("Unable to access clipboard. Please paste manually using Ctrl+V / Cmd+V.");
     }
   };
 
-  // Passphrase Detection
-  const isPassphrase = password.length > 18 && (password.includes(" ") || password.includes("-") || password.includes("_"));
+  const isPassphrase = result?.passphrase || (password.length > 18 && (password.includes(" ") || password.includes("-") || password.includes("_")));
 
-  // Logarithmic crack-time calculator for different computing capabilities
   const crackTimeEstimator = (entropy: number) => {
     if (entropy === 0) return { online: "0s", gpu: "0s", supercomputer: "0s" };
 
     const combinations = Math.pow(2, entropy);
-
-    // Guesses per second
-    const speedOnline = 100; // online throttling
-    const speedGpu = 1e10;   // 10 Billion guesses/sec
-    const speedSuper = 1e14; // 100 Trillion guesses/sec
+    const speedOnline = 100;
+    const speedGpu = 1e10;
+    const speedSuper = 1e14;
 
     const format = (seconds: number) => {
       if (seconds < 1) return "Instant";
@@ -71,9 +66,8 @@ export default function StrengthCheckerPage() {
     };
   };
 
-  const times = result ? crackTimeEstimator(result.details.entropy) : null;
+  const times = result ? crackTimeEstimator(result.entropy) : null;
 
-  // Render color depending on score
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-emerald-500 border-emerald-500/20 bg-emerald-500/5";
     if (score >= 75) return "text-green-500 border-green-500/20 bg-green-500/5";
@@ -96,15 +90,14 @@ export default function StrengthCheckerPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight dark:text-white sm:text-3xl">
-          Logarithmic Password Strength Checker
+          Password Strength Checker
         </h1>
         <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-          Analyze password complexity, entropy variables, and structural vulnerabilities locally.
+          Analyze password complexity, entropy, and structural vulnerabilities.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Input Card */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="glass-panel overflow-hidden border-gray-200/60 dark:border-gray-800/80">
             <CardContent className="p-6">
@@ -149,19 +142,17 @@ export default function StrengthCheckerPage() {
             </CardContent>
           </Card>
 
-          {/* Interactive Evaluation Results */}
           {result && (
             <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
               <CardContent className="p-6 space-y-6">
-                {/* Score and meter */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                        Cryptographic Rating
+                        Strength Rating
                       </span>
                       <h3 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white mt-0.5">
-                        {result.label}
+                        {result.strength}
                       </h3>
                     </div>
                     <div className={`rounded-xl border px-3 py-1.5 text-center text-sm font-extrabold ${getScoreColor(result.score)}`}>
@@ -169,7 +160,6 @@ export default function StrengthCheckerPage() {
                     </div>
                   </div>
 
-                  {/* Animated Progress Bar */}
                   <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
                     <div
                       className={`h-full transition-all duration-500 ${getProgressBarColor(result.score)}`}
@@ -178,7 +168,6 @@ export default function StrengthCheckerPage() {
                   </div>
                 </div>
 
-                {/* Passphrase badge */}
                 {isPassphrase && (
                   <div className="flex items-center gap-2.5 rounded-xl border border-blue-200 bg-blue-50/50 p-4.5 dark:border-blue-900/40 dark:bg-blue-950/20 text-left">
                     <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
@@ -191,13 +180,14 @@ export default function StrengthCheckerPage() {
                   </div>
                 )}
 
-                {/* Character category breakdown */}
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {[
-                    { label: "Uppercase", met: result.details.hasUppercase },
-                    { label: "Lowercase", met: result.details.hasLowercase },
-                    { label: "Numbers", met: result.details.hasNumbers },
-                    { label: "Symbols", met: result.details.hasSymbols },
+                    { label: "Uppercase", met: result.checks.uppercase },
+                    { label: "Lowercase", met: result.checks.lowercase },
+                    { label: "Numbers", met: result.checks.numbers },
+                    { label: "Symbols", met: result.checks.symbols },
+                    { label: "No Dictionary", met: !result.checks.dictionary },
+                    { label: "No Patterns", met: !result.checks.keyboardPattern && !result.checks.sequence && !result.checks.repeated },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -213,17 +203,16 @@ export default function StrengthCheckerPage() {
                   ))}
                 </div>
 
-                {/* Crack Time Estimates Table */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                    Estimated Crack Time Metrics
+                    Estimated Crack Time
                   </h4>
                   {times && (
                     <div className="divide-y divide-gray-100 rounded-xl border border-gray-100 bg-white/40 dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900/20">
                       <div className="flex items-center justify-between p-3">
                         <div className="text-xs text-gray-600 dark:text-gray-400">
                           <span className="font-semibold text-gray-900 dark:text-white">Online Throttling</span>
-                          <p className="text-[10px]">100 guesses/sec (e.g., standard login portal)</p>
+                          <p className="text-[10px]">100 guesses/sec (standard login portal)</p>
                         </div>
                         <span className="text-sm font-bold text-green-500">{times.online}</span>
                       </div>
@@ -244,12 +233,20 @@ export default function StrengthCheckerPage() {
                     </div>
                   )}
                 </div>
+
+                {result.crackTime && (
+                  <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-gray-50/50 p-3 dark:border-gray-800 dark:bg-gray-900/30">
+                    <Shield className="h-4 w-4 text-gray-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      <span className="font-semibold text-gray-900 dark:text-white">Backend estimate:</span> {result.crackTime}
+                    </span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
         </div>
 
-        {/* Side Panel: Statistics, Metrics & Advice */}
         <div className="space-y-6">
           <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
             <CardContent className="p-6 space-y-4">
@@ -264,26 +261,25 @@ export default function StrengthCheckerPage() {
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-gray-500 dark:text-gray-400">Entropy Score:</span>
                   <span className="font-bold text-gray-900 dark:text-white">
-                    {result ? `${Math.round(result.details.entropy)} bits` : "0 bits"}
+                    {result ? `${Math.round(result.entropy)} bits` : "0 bits"}
                   </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Suggestions Card */}
-          {result && result.recommendations.length > 0 && (
+          {result && result.suggestions.length > 0 && (
             <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-center gap-1.5">
                   <Terminal className="h-4.5 w-4.5 text-blue-600 dark:text-blue-500" />
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Vulnerability Recommendations</h3>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Security Recommendations</h3>
                 </div>
                 <ul className="space-y-3 text-xs text-gray-600 dark:text-gray-400">
-                  {result.recommendations.map((rec, i) => (
+                  {result.suggestions.map((suggestion, i) => (
                     <li key={i} className="flex gap-2.5 items-start text-left">
                       <span className="flex h-1.5 w-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
-                      <span>{rec}</span>
+                      <span>{suggestion}</span>
                     </li>
                   ))}
                 </ul>
@@ -291,13 +287,12 @@ export default function StrengthCheckerPage() {
             </Card>
           )}
 
-          {/* Safe Tips */}
           <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80 bg-blue-500/5 border-blue-500/10">
             <CardContent className="p-6 space-y-3">
               <div className="flex items-center gap-2">
                 <Info className="h-4.5 w-4.5 text-blue-500" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                  NIST Guidance Tip
+                  NIST Guidance
                 </h3>
               </div>
               <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed text-left">

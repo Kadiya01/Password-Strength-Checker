@@ -54,7 +54,18 @@ export class ReportExportService {
     const headers = this.getCSVHeaders(type);
     const rows = data.map((item) => this.getCSVRow(item as Record<string, unknown>, type));
 
-    return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    return [headers.join(","), ...rows.map((row) => row.map((cell) => this.escapeCSVValue(cell)).join(","))].join("\n");
+  }
+
+  private escapeCSVValue(value: string): string {
+    const trimmed = value.trim();
+    if (/^[=+\-@\t\r]/.test(trimmed)) {
+      return `"${trimmed}"`;
+    }
+    if (trimmed.includes(",") || trimmed.includes('"') || trimmed.includes("\n")) {
+      return `"${trimmed.replace(/"/g, '""')}"`;
+    }
+    return trimmed;
   }
 
   private getCSVHeaders(type: string): string[] {

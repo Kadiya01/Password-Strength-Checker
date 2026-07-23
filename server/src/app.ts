@@ -16,9 +16,19 @@ import { routes } from "@/routes";
 export function createApp(): express.Express {
   const app = express();
 
+  // Trust first proxy (for rate limiting and IP logging behind reverse proxy)
+  app.set("trust proxy", 1);
+
   // Security headers
   app.use(helmet());
   app.use(cors(corsConfig));
+
+  // Add Vary: Origin header for proper caching with CORS
+  app.use((_req, res, next) => {
+    res.setHeader("Vary", "Origin");
+    next();
+  });
+
   app.use(rateLimiter);
 
   // Compression

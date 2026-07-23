@@ -1,0 +1,145 @@
+@baseUrl = http://localhost:3000
+@authToken =
+
+### Register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Test User",
+  "email": "test@example.com",
+  "password": "Test@12345",
+  "confirmPassword": "Test@12345"
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Test@12345"
+}
+
+# After running Login, copy the accessToken from the response and paste above.
+
+### Refresh Token
+POST {{baseUrl}}/api/auth/refresh-token
+Content-Type: application/json
+
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Forgot Password
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+### Reset Password
+POST {{baseUrl}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "xxx",
+  "password": "NewPass@123",
+  "confirmPassword": "NewPass@123"
+}
+
+###
+# ===================== Password =====================
+
+### Check Password Strength
+POST {{baseUrl}}/api/password/check-strength
+Content-Type: application/json
+
+{
+  "password": "MyP@ssw0rd"
+}
+
+### Generate Password
+POST {{baseUrl}}/api/password/generate
+Content-Type: application/json
+
+{
+  "length": 16,
+  "includeUppercase": true,
+  "includeLowercase": true,
+  "includeNumbers": true,
+  "includeSymbols": true
+}
+
+### Generate Passphrase
+POST {{baseUrl}}/api/password/generate-passphrase
+Content-Type: application/json
+
+{
+  "wordCount": 4,
+  "separator": "-"
+}
+
+### Password History
+GET {{baseUrl}}/api/password/history?page=1&limit=10
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+###
+# ===================== Dashboard =====================
+
+### Get Dashboard Statistics
+GET {{baseUrl}}/api/dashboard/statistics
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Security Score
+GET {{baseUrl}}/api/dashboard/security-score
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Login History
+GET {{baseUrl}}/api/dashboard/login-history
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Activity Timeline
+GET {{baseUrl}}/api/dashboard/activity-timeline
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Password Analytics
+GET {{baseUrl}}/api/dashboard/password-analytics
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Chart Data
+GET {{baseUrl}}/api/dashboard/chart-data
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get Generation Stats
+GET {{baseUrl}}/api/dashboard/generation-stats
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+###
+# ===================== User =====================
+
+### Get User Profile
+GET {{baseUrl}}/api/users/profile
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Update User Profile
+PUT {{baseUrl}}/api/users/profile
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "fullName": "Updated Name",
+  "email": "test@example.com"
+}

@@ -11,9 +11,9 @@ export function useLogin() {
   const { addToast } = useUiStore();
 
   return useMutation({
-    mutationFn: (data: LoginFormData) => authService.login(data.email, data.password),
+    mutationFn: (data: LoginFormData) => authService.login(data.email, data.password, data.rememberMe ?? false),
     onSuccess: (result) => {
-      setAuth(result.user, result.token);
+      setAuth(result.user, result.accessToken);
       addToast({ type: "success", message: "Login successful!" });
       navigate("/dashboard");
     },
@@ -34,7 +34,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: (payload: Parameters<typeof authService.register>[0]) => authService.register(payload),
     onSuccess: (result) => {
-      setAuth(result.user, result.token);
+      setAuth(result.user, result.accessToken);
       addToast({ type: "success", message: "Registration successful!" });
       navigate("/dashboard");
     },

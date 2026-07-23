@@ -2,26 +2,22 @@ import { config } from "@/config";
 import prisma from "@/config/database.config";
 
 export async function handleFailedLogin(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) return;
-
-  const newAttempts = user.failedAttempts + 1;
-
-  if (newAttempts >= config.MAX_LOGIN_ATTEMPTS) {
-    const lockUntil = new Date(Date.now() + config.LOCKOUT_DURATION_MS);
-    await prisma.user.update({
+  try {
+    const updated = await prisma.user.update({
       where: { id: userId },
-      data: {
-        failedAttempts: newAttempts,
-        isLocked: true,
-        lockUntil,
-      },
+      data: { failedAttempts: { increment: 1 } },
+      select: { failedAttempts: true },
     });
-  } else {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { failedAttempts: newAttempts },
-    });
+
+    if (updated.failedAttempts >= config.MAX_LOGIN_ATTEMPTS) {
+      const lockUntil = new Date(Date.now() + config.LOCKOUT_DURATION_MS);
+      await prisma.user.update({
+        where: { id: userId },
+        data: { isLocked: true, lockUntil },
+      });
+    }
+  } catch {
+    // Silently handle DB errors during lockout to avoid crashing login flow
   }
 }
 
@@ -38,20 +34,24 @@ export async function handleSuccessfulLogin(userId: string): Promise<void> {
 }
 
 export async function isAccountLocked(userId: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { isLocked: true, lockUntil: true },
-  });
-
-  if (!user || !user.isLocked) return false;
-
-  if (user.lockUntil && user.lockUntil <= new Date()) {
-    await prisma.user.update({
+  try {
+    const user = await prisma.user.findUnique({
       where: { id: userId },
-      data: { isLocked: false, lockUntil: null, failedAttempts: 0 },
+      select: { isLocked: true, lockUntil: true },
     });
+
+    if (!user || !user.isLocked) return false;
+
+    if (user.lockUntil && user.lockUntil <= new Date()) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { isLocked: false, lockUntil: null, failedAttempts: 0 },
+      });
+      return false;
+    }
+
+    return true;
+  } catch {
     return false;
   }
-
-  return true;
 }

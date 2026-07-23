@@ -8,6 +8,7 @@ import { usePasswordHistory } from "@/hooks/usePasswordHistory";
 import { useUiStore } from "@/store/uiStore";
 import { passwordService } from "@/services/passwordService";
 import { formatDate, getStrengthColor } from "@/utils/formatters";
+import { getEstimatedCrackTime } from "@/utils/password-utils";
 import type { PasswordLog } from "@/types/password.types";
 
 export default function HistoryPage() {
@@ -17,27 +18,11 @@ export default function HistoryPage() {
   const { addToast } = useUiStore();
 
   const handleClearHistory = () => {
-    if (confirm("Are you sure you want to permanently clear all password evaluations history?")) {
-      passwordService.clearHistory();
-      addToast({ type: "success", message: "Audit history logs cleared successfully!" });
-      refetch();
-    }
-  };
-
-  // Convert entropy to estimated crack time text
-  const getEstimatedCrackTime = (entropy: number) => {
-    if (entropy === 0) return "0s";
-    const guessesPerSec = 1e10; // 10 Billion guesses/second (Standard GPU rig)
-    const combinations = Math.pow(2, entropy);
-    const seconds = (combinations / 2) / guessesPerSec;
-
-    if (seconds < 1) return "Instant";
-    if (seconds < 60) return `${Math.round(seconds)}s`;
-    if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
-    if (seconds < 86400) return `${Math.round(seconds / 3600)}h`;
-    if (seconds < 31536000) return `${Math.round(seconds / 86400)}d`;
-    if (seconds < 3153600000) return `${Math.round(seconds / 31536000)}y`;
-    return "Centuries";
+    const confirmed = window.confirm("Clear password evaluation history?");
+    if (!confirmed) return;
+    passwordService.clearHistory();
+    addToast({ type: "info", message: "History clearing is not supported by the server." });
+    refetch();
   };
 
   const handleExportCSV = () => {
@@ -67,7 +52,7 @@ export default function HistoryPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `sentinelpass_audit_log_${Date.now()}.csv`);
+    link.setAttribute("download", `password_audit_log_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -83,8 +68,7 @@ export default function HistoryPage() {
   }
 
   const allLogs: PasswordLog[] = data?.data || [];
-  
-  // Client-side search filtering
+
   const filteredLogs = allLogs.filter((log: PasswordLog) => {
     const q = search.toLowerCase();
     return (
@@ -101,10 +85,10 @@ export default function HistoryPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight dark:text-white sm:text-3xl">
-            Credential Audit Log
+            Password Audit Log
           </h1>
           <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-            Export and inspect historical evaluations audit metrics.
+            Export and inspect historical evaluation metrics.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -127,12 +111,13 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
       <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
         <CardContent className="p-4">
+          <label htmlFor="history-search" className="sr-only">Search password history</label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
+              id="history-search"
               type="text"
               placeholder="Search by strength label or scores..."
               value={search}
@@ -143,7 +128,6 @@ export default function HistoryPage() {
         </CardContent>
       </Card>
 
-      {/* Table Section */}
       {filteredLogs.length === 0 ? (
         <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
           <CardContent className="p-12 text-center text-gray-400">
@@ -161,7 +145,7 @@ export default function HistoryPage() {
               <thead className="bg-gray-50/50 dark:bg-gray-900/80">
                 <tr>
                   <th className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Date Checked</th>
-                  <th className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Password Score</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Score</th>
                   <th className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Strength</th>
                   <th className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Entropy</th>
                   <th className="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Crack Time (GPU)</th>
@@ -202,7 +186,6 @@ export default function HistoryPage() {
             </table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
               <p className="text-xs text-gray-500">

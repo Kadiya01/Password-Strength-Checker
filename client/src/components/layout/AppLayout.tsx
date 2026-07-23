@@ -78,7 +78,8 @@ export default function AppLayout() {
           </button>
 
           {/* User Widget */}
-          <div className="flex items-center gap-3 border-l border-gray-200 pl-3 dark:border-gray-800">
+          <nav aria-label="Main navigation">
+            <div className="flex items-center gap-3 border-l border-gray-200 pl-3 dark:border-gray-800">
             <div className="hidden text-right sm:block">
               <p className="text-xs font-semibold text-gray-900 dark:text-white">
                 {user?.firstName ? `${user.firstName} ${user.lastName || ""}` : user?.username || "Secure User"}
@@ -95,10 +96,12 @@ export default function AppLayout() {
               onClick={() => logout.mutate()}
               title="Logout"
               className="rounded-lg p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+              aria-label="Logout"
             >
               <LogOut className="h-4 w-4" />
             </button>
           </div>
+            </nav>
         </div>
       </header>
 
@@ -233,7 +236,7 @@ export default function AppLayout() {
       </div>
 
       {/* Floating Bottom Navigation (Mobile Viewports Only) */}
-      <div className="fixed bottom-0 right-0 left-0 z-30 flex h-16 items-center justify-around border-t border-gray-200/80 bg-white/90 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-900/90 lg:hidden">
+      <nav aria-label="Quick navigation" className="fixed bottom-0 right-0 left-0 z-30 flex h-16 items-center justify-around border-t border-gray-200/80 bg-white/90 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-900/90 lg:hidden">
         <Link
           to="/dashboard"
           className={`flex flex-col items-center justify-center text-[10px] font-medium transition-all ${
@@ -278,7 +281,7 @@ export default function AppLayout() {
           <History className="h-5 w-5" />
           <span>History</span>
         </Link>
-      </div>
+      </nav>
     </div>
   );
 }

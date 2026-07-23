@@ -25,7 +25,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     return (
       <div className="w-full space-y-1.5 text-left">
         {label && (
-          <label className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
+          <label htmlFor={props.id} className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
             {label}
           </label>
         )}

@@ -55,7 +55,7 @@ function ToastItem({
     >
       <Icon className="h-5 w-5 flex-shrink-0" />
       <p className="flex-1 text-sm font-medium">{toast.message}</p>
-      <button onClick={() => onRemove(toast.id)} className="flex-shrink-0 opacity-70 hover:opacity-100">
+      <button onClick={() => onRemove(toast.id)} aria-label="Close notification" className="flex-shrink-0 opacity-70 hover:opacity-100">
         <X className="h-4 w-4" />
       </button>
     </motion.div>

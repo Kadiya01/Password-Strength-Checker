@@ -40,8 +40,7 @@ export default function LoginForm() {
             href="#forgot-password"
             onClick={(e) => {
               e.preventDefault();
-              alert("Password recovery email has been simulated. Check console logs.");
-              console.log("Simulating password recovery for current session email.");
+              console.warn("Password recovery email has been simulated. Check console logs.");
             }}
             className="text-[11px] font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
           >

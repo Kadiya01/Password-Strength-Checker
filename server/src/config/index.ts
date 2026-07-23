@@ -22,6 +22,7 @@ export const config = {
   CLIENT_URL: getEnvVar("CLIENT_URL", "http://localhost:5173"),
   DATABASE_URL: getEnvVar("DATABASE_URL"),
   JWT_SECRET: getEnvVar("JWT_SECRET"),
+  JWT_REFRESH_SECRET: getEnvVar("JWT_REFRESH_SECRET"),
   JWT_EXPIRES_IN: getEnvVar("JWT_EXPIRES_IN", "15m"),
   JWT_REFRESH_EXPIRES_IN: getEnvVar("JWT_REFRESH_EXPIRES_IN", "7d"),
   BCRYPT_ROUNDS: getEnvInt("BCRYPT_ROUNDS", 12),

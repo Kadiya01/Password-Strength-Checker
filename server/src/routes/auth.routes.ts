@@ -137,7 +137,7 @@ router.post("/logout", authenticate, authController.logout);
  *       401:
  *         description: Invalid or expired refresh token
  */
-router.post("/refresh-token", authController.refreshToken);
+router.post("/refresh-token", authRateLimiter, authController.refreshToken);
 
 /**
  * @swagger

@@ -8,6 +8,7 @@ import Input from "@/components/ui/Input";
 import PasswordInput from "@/components/ui/PasswordInput";
 import { calculateLocalStrength } from "@/services/passwordService";
 
+
 export default function RegisterForm() {
   const registerUser = useRegister();
   const {

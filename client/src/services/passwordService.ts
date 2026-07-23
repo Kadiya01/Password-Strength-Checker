@@ -1,19 +1,25 @@
 import api from "./api";
-import type { StrengthResult, GenerateOptions, GenerateResult, PasswordLog } from "@/types/password.types";
+import type {
+  PasswordAnalysisResult,
+  GenerateOptions,
+  GenerateResult,
+  GeneratePassphraseResult,
+  PasswordLog,
+} from "@/types/password.types";
 import type { ApiResponse, PaginatedResponse } from "@/types/api.types";
 
-// Local storage key for fallback history
-const FALLBACK_HISTORY_KEY = "sentinelpass_history_fallback";
-
-// Helper to calculate entropy and strength details locally
-export function calculateLocalStrength(password: string): StrengthResult {
-  const len = password.length;
-  if (!len) {
+export function calculateLocalStrength(password: string): {
+  score: number;
+  label: string;
+  details: { hasUppercase: boolean; hasLowercase: boolean; hasNumbers: boolean; hasSymbols: boolean; length: number; entropy: number };
+  recommendations: string[];
+} {
+  if (!password) {
     return {
       score: 0,
       label: "Very Weak",
       details: { hasUppercase: false, hasLowercase: false, hasNumbers: false, hasSymbols: false, length: 0, entropy: 0 },
-      recommendations: ["Password cannot be empty."]
+      recommendations: ["Enter a password to analyze"],
     };
   }
 
@@ -21,206 +27,70 @@ export function calculateLocalStrength(password: string): StrengthResult {
   const hasLowercase = /[a-z]/.test(password);
   const hasNumbers = /[0-9]/.test(password);
   const hasSymbols = /[^A-Za-z0-9]/.test(password);
+  const length = password.length;
 
-  // Pool size calculation
   let poolSize = 0;
   if (hasLowercase) poolSize += 26;
   if (hasUppercase) poolSize += 26;
   if (hasNumbers) poolSize += 10;
-  if (hasSymbols) poolSize += 33; // Standard special characters
+  if (hasSymbols) poolSize += 33;
 
-  if (poolSize === 0) poolSize = 1; // Fallback
+  const entropy = poolSize > 0 ? length * Math.log2(poolSize) : 0;
+  const score = Math.min(100, Math.round(entropy / 1.5));
 
-  const entropy = len * Math.log2(poolSize);
-
-  // Calculate score (0-100)
-  let score = 0;
-  // Length contribution (up to 40 points)
-  score += Math.min(len * 3, 40);
-  // Variety contribution (up to 40 points)
-  if (hasLowercase) score += 10;
-  if (hasUppercase) score += 10;
-  if (hasNumbers) score += 10;
-  if (hasSymbols) score += 10;
-  // Extra bonus for length (up to 20 points)
-  if (len >= 12) score += 10;
-  if (len >= 16) score += 10;
-
-  // Deduct points for repetitive characters
-  const uniqueChars = new Set(password).size;
-  const repeatDeduction = Math.max(0, (len - uniqueChars) * 2);
-  score = Math.max(0, score - repeatDeduction);
-
-  // Scale/Cap score
-  score = Math.min(100, Math.round(score));
+  const recommendations: string[] = [];
+  if (length < 8) recommendations.push("Use at least 8 characters");
+  if (!hasUppercase) recommendations.push("Add uppercase letters");
+  if (!hasLowercase) recommendations.push("Add lowercase letters");
+  if (!hasNumbers) recommendations.push("Add numbers");
+  if (!hasSymbols) recommendations.push("Add special characters");
+  if (recommendations.length === 0) recommendations.push("Great job! Your password looks strong.");
 
   let label = "Very Weak";
-  if (score >= 90) label = "Excellent";
+  if (score >= 90) label = "Very Strong";
   else if (score >= 75) label = "Strong";
-  else if (score >= 60) label = "Good";
-  else if (score >= 40) label = "Fair";
-  else if (score >= 20) label = "Weak";
-
-  // Create recommendations based on missing items
-  const recommendations: string[] = [];
-  if (len < 12) {
-    recommendations.push("Increase password length to at least 12 characters.");
-  }
-  if (!hasUppercase) {
-    recommendations.push("Add at least one uppercase letter (A-Z).");
-  }
-  if (!hasLowercase) {
-    recommendations.push("Add at least one lowercase letter (a-z).");
-  }
-  if (!hasNumbers) {
-    recommendations.push("Add at least one numerical digit (0-9).");
-  }
-  if (!hasSymbols) {
-    recommendations.push("Add at least one special character or symbol (e.g. @, #, $).");
-  }
-  if (uniqueChars / len < 0.7) {
-    recommendations.push("Reduce repeating characters to increase structural complexity.");
-  }
-  if (recommendations.length === 0) {
-    recommendations.push("Your password meets all security criteria. Great job!");
-  }
+  else if (score >= 50) label = "Fair";
+  else if (score >= 25) label = "Weak";
 
   return {
     score,
     label,
-    details: {
-      hasUppercase,
-      hasLowercase,
-      hasNumbers,
-      hasSymbols,
-      length: len,
-      entropy
-    },
-    recommendations
+    details: { hasUppercase, hasLowercase, hasNumbers, hasSymbols, length, entropy: Math.round(entropy) },
+    recommendations,
   };
 }
 
 export const passwordService = {
-  async checkStrength(password: string): Promise<StrengthResult> {
-    try {
-      const { data } = await api.post<ApiResponse<StrengthResult>>("/password/check-strength", { password });
-      if (data.data) {
-        // Save to local logs for sync
-        this.saveLocalLog(password, data.data);
-        return data.data;
-      }
-    } catch {
-      // Fallback to local calculation if offline
-      const localResult = calculateLocalStrength(password);
-      this.saveLocalLog(password, localResult);
-      return localResult;
-    }
-    throw new Error("Unable to check strength");
+  async checkStrength(password: string): Promise<PasswordAnalysisResult> {
+    const { data } = await api.post<ApiResponse<PasswordAnalysisResult>>("/password/check-strength", { password });
+    if (!data.data) throw new Error(data.message || "Failed to check password strength");
+    return data.data;
   },
 
   async generate(options: GenerateOptions = {}): Promise<GenerateResult> {
-    try {
-      const { data } = await api.post<ApiResponse<GenerateResult>>("/password/generate", options);
-      if (data.data) return data.data;
-    } catch {
-      // Fallback generator
-      const length = options.length || 16;
-      let chars = "";
-      
-      const lowercaseSet = "abcdefghijklmnopqrstuvwxyz";
-      const uppercaseSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const numbersSet = "0123456789";
-      const symbolsSet = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const { data } = await api.post<ApiResponse<GenerateResult>>("/password/generate", options);
+    if (!data.data) throw new Error(data.message || "Failed to generate password");
+    return data.data;
+  },
 
-      let similar = /[iIl1oO0]/;
-      let ambiguous = /[{}[\]()/\'\"`~,;:.<>]/;
-
-      let filteredLowercase = lowercaseSet;
-      let filteredUppercase = uppercaseSet;
-      let filteredNumbers = numbersSet;
-      let filteredSymbols = symbolsSet;
-
-      if (options.excludeAmbiguous) {
-        filteredLowercase = filteredLowercase.replace(similar, "");
-        filteredUppercase = filteredUppercase.replace(similar, "");
-        filteredNumbers = filteredNumbers.replace(similar, "");
-        filteredSymbols = filteredSymbols.split("").filter(c => !ambiguous.test(c)).join("");
-      }
-
-      if (options.includeLowercase !== false) chars += filteredLowercase;
-      if (options.includeUppercase) chars += filteredUppercase;
-      if (options.includeNumbers) chars += filteredNumbers;
-      if (options.includeSymbols) chars += filteredSymbols;
-
-      if (!chars) chars = filteredLowercase; // Fallback
-
-      let password = "";
-      for (let i = 0; i < length; i++) {
-        const idx = Math.floor(Math.random() * chars.length);
-        password += chars[idx];
-      }
-
-      return {
-        password,
-        strength: calculateLocalStrength(password)
-      };
-    }
-    throw new Error("Unable to generate password");
+  async generatePassphrase(options: { words?: number; separator?: string } = {}): Promise<GeneratePassphraseResult> {
+    const { data } = await api.post<ApiResponse<GeneratePassphraseResult>>("/password/generate-passphrase", options);
+    if (!data.data) throw new Error(data.message || "Failed to generate passphrase");
+    return data.data;
   },
 
   async getHistory(page = 1, limit = 20): Promise<PaginatedResponse<PasswordLog>> {
-    try {
-      const { data } = await api.get<ApiResponse<PaginatedResponse<PasswordLog>>>("/password/history", {
-        params: { page, limit },
-      });
-      if (data.data) return data.data;
-    } catch {
-      // Local fallback
-      const stored = localStorage.getItem(FALLBACK_HISTORY_KEY);
-      const allLogs: PasswordLog[] = stored ? JSON.parse(stored) : [];
-      
-      const startIndex = (page - 1) * limit;
-      const paginatedLogs = allLogs.slice(startIndex, startIndex + limit);
-      
-      return {
-        data: paginatedLogs,
-        pagination: {
-          page,
-          limit,
-          total: allLogs.length,
-          totalPages: Math.ceil(allLogs.length / limit)
-        }
-      };
-    }
-    throw new Error("Unable to fetch history");
+    const { data } = await api.get<ApiResponse<PaginatedResponse<PasswordLog>>>("/password/history", {
+      params: { page, limit },
+    });
+    if (!data.data) throw new Error(data.message || "Failed to fetch history");
+    return data.data;
   },
 
-  // Save history log locally for dashboard stats/log consistency
-  saveLocalLog(password: string, result: StrengthResult): void {
-    const stored = localStorage.getItem(FALLBACK_HISTORY_KEY);
-    const logs: PasswordLog[] = stored ? JSON.parse(stored) : [];
-
-    const newLog: PasswordLog = {
-      id: Date.now(),
-      userId: 1,
-      strengthScore: result.score,
-      strengthLabel: result.label,
-      hasUppercase: result.details.hasUppercase,
-      hasLowercase: result.details.hasLowercase,
-      hasNumbers: result.details.hasNumbers,
-      hasSymbols: result.details.hasSymbols,
-      entropy: result.details.entropy,
-      createdAt: new Date().toISOString()
-    };
-
-    // Keep logs within size limit
-    logs.unshift(newLog);
-    if (logs.length > 100) logs.pop();
-
-    localStorage.setItem(FALLBACK_HISTORY_KEY, JSON.stringify(logs));
+  async clearHistory(): Promise<void> {
+    // Backend does not support clearing history - this is a no-op
+    // that prevents runtime errors if the button is clicked
   },
-
-  clearHistory(): void {
-    localStorage.removeItem(FALLBACK_HISTORY_KEY);
-  }
 };
+
+export type PasswordService = typeof passwordService;

@@ -64,7 +64,7 @@ const faqs = [
   },
   {
     q: "Are my passwords sent to the server in plaintext?",
-    a: "Absolutely not. Evaluations on the Checker page are calculated directly in the browser. When communicating with the authentication endpoints, passwords are encrypted over HTTPS and stored using strong, industry-standard cryptographic hashing on the server."
+    a: "Password evaluations on the Strength Checker page are sent to the server API over HTTPS for analysis. The server performs entropy calculations and returns the result. When communicating with authentication endpoints, passwords are encrypted in transit and stored using strong, industry-standard cryptographic hashing on the server. No plaintext passwords are persisted."
   },
   {
     q: "What is NIST compliance in this context?",
@@ -286,13 +286,15 @@ export default function LandingPage() {
               >
                 <button
                   onClick={() => toggleFaq(idx)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${idx}`}
                   className="flex w-full items-center justify-between px-5 py-4 text-left font-semibold text-gray-900 dark:text-white"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                 </button>
                 {isOpen && (
-                  <div className="border-t border-gray-100 bg-white/20 px-5 py-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                  <div id={`faq-answer-${idx}`} role="region" className="border-t border-gray-100 bg-white/20 px-5 py-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
                     {faq.a}
                   </div>
                 )}

@@ -1,63 +1,88 @@
 import api from "./api";
-import type { DashboardStatistics, LoginActivity } from "@/types/dashboard.types";
+import type {
+  DashboardStatistics,
+  SecurityScore,
+  LoginActivity,
+  PasswordAnalytics,
+  PasswordChart,
+  ActivityTimelineItem,
+  SecurityEventRecord,
+  PaginatedResult,
+} from "@/types/dashboard.types";
 import type { ApiResponse } from "@/types/api.types";
-import type { PasswordLog } from "@/types/password.types";
-
-const FALLBACK_HISTORY_KEY = "sentinelpass_history_fallback";
 
 export const dashboardService = {
   async getStatistics(): Promise<DashboardStatistics> {
-    try {
-      const { data } = await api.get<ApiResponse<DashboardStatistics>>("/dashboard/statistics");
-      if (data.data) return data.data;
-    } catch {
-      // Local fallback calculation based on evaluations history
-      const stored = localStorage.getItem(FALLBACK_HISTORY_KEY);
-      const logs: PasswordLog[] = stored ? JSON.parse(stored) : [];
+    const { data } = await api.get<ApiResponse<DashboardStatistics>>("/dashboard/statistics");
+    if (!data.data) throw new Error(data.message || "Failed to fetch dashboard statistics");
+    return data.data;
+  },
 
-      const totalChecked = logs.length;
-      let totalScore = 0;
-      let weak = 0;
-      let fair = 0;
-      let strong = 0;
-      let veryStrong = 0;
+  async getSecurityScore(): Promise<SecurityScore> {
+    const { data } = await api.get<ApiResponse<SecurityScore>>("/dashboard/security-score");
+    if (!data.data) throw new Error(data.message || "Failed to fetch security score");
+    return data.data;
+  },
 
-      logs.forEach((log) => {
-        totalScore += log.strengthScore;
-        if (log.strengthScore >= 90) {
-          veryStrong++;
-        } else if (log.strengthScore >= 75) {
-          strong++;
-        } else if (log.strengthScore >= 45) {
-          fair++;
-        } else {
-          weak++;
-        }
-      });
+  async getLoginHistory(params?: {
+    page?: number;
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<PaginatedResult<LoginActivity>> {
+    const { data } = await api.get<ApiResponse<PaginatedResult<LoginActivity>>>("/dashboard/login-history", { params });
+    if (!data.data) throw new Error(data.message || "Failed to fetch login history");
+    return data.data;
+  },
 
-      const averageStrength = totalChecked > 0 ? Math.round(totalScore / totalChecked) : 0;
-      const securityScore = averageStrength; // Use average strength as base security index
+  async getSecurityEvents(params?: {
+    page?: number;
+    limit?: number;
+    eventType?: string;
+  }): Promise<PaginatedResult<SecurityEventRecord>> {
+    const { data } = await api.get<ApiResponse<PaginatedResult<SecurityEventRecord>>>("/dashboard/security-events", { params });
+    if (!data.data) throw new Error(data.message || "Failed to fetch security events");
+    return data.data;
+  },
 
-      // Mock login activities matching the interface
-      const recentActivity: LoginActivity[] = [
-        { id: 1, ipAddress: "192.168.1.1", success: true, createdAt: new Date().toISOString() },
-        { id: 2, ipAddress: "192.168.1.25", success: true, createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
-        { id: 3, ipAddress: "172.16.254.1", success: false, createdAt: new Date(Date.now() - 3600000 * 18).toISOString() },
-      ];
+  async getActivityTimeline(params?: {
+    page?: number;
+    limit?: number;
+    type?: "login" | "password_check" | "security_event" | "registration";
+  }): Promise<PaginatedResult<ActivityTimelineItem>> {
+    const { data } = await api.get<ApiResponse<PaginatedResult<ActivityTimelineItem>>>("/dashboard/activity-timeline", { params });
+    if (!data.data) throw new Error(data.message || "Failed to fetch activity timeline");
+    return data.data;
+  },
 
-      return {
-        totalPasswordsChecked: totalChecked || 12,
-        averageStrength: averageStrength || 70,
-        securityScore: securityScore || 70,
-        strengthDistribution: {
-          weak: weak || 2,
-          fair: fair || 3,
-          strong: strong || 5,
-          veryStrong: veryStrong || 2,
-        },
-        recentActivity,
-      };
-    }
-    throw new Error("Unable to fetch dashboard statistics");
+  async getPasswordAnalytics(): Promise<PasswordAnalytics> {
+    const { data } = await api.get<ApiResponse<PasswordAnalytics>>("/dashboard/password-analytics");
+    if (!data.data) throw new Error(data.message || "Failed to fetch password analytics");
+    return data.data;
+  },
+
+  async getChartData(): Promise<PasswordChart> {
+    const { data } = await api.get<ApiResponse<PasswordChart>>("/dashboard/chart-data");
+    if (!data.data) throw new Error(data.message || "Failed to fetch chart data");
+    return data.data;
+  },
+
+  async getGenerationStats(): Promise<{ totalGenerated: number; byType: { standard: number; passphrase: number } }> {
+    const { data } = await api.get<ApiResponse<{ totalGenerated: number; byType: { standard: number; passphrase: number } }>>("/dashboard/generation-stats");
+    if (!data.data) throw new Error(data.message || "Failed to fetch generation stats");
+    return data.data;
+  },
+
+  async exportData(params?: {
+    format?: "csv" | "json";
+    type?: "password_logs" | "login_history" | "security_events";
+    startDate?: string;
+    endDate?: string;
+  }): Promise<Blob> {
+    const { data } = await api.get("/dashboard/export", {
+      params,
+      responseType: "blob",
+    });
+    return data;
   },
 };

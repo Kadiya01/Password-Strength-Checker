@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { router } from "@/router";
 import { ToastContainer } from "@/components/ui";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { AuthProvider } from "@/context/AuthContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,8 +19,10 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <ToastContainer />
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <ToastContainer />
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

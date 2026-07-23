@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { User, Lock, Key, Clock, ShieldCheck, Mail } from "lucide-react";
+import { User, Lock, Clock, ShieldCheck, Mail } from "lucide-react";
 import { userService } from "@/services/userService";
 import { useUiStore } from "@/store/uiStore";
 import { useAuthStore } from "@/store/authStore";
+import { useLoginHistory } from "@/hooks/useDashboard";
 import ProfileForm from "@/components/forms/ProfileForm";
 import Card, { CardHeader, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -19,8 +20,7 @@ export default function ProfilePage() {
   const { updateUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState<"profile" | "password" | "logins">("profile");
 
-  // Local state for Change Password Form
-  const [pwForm, setPwForm] = useState({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [pwPending, setPwPending] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
@@ -28,9 +28,10 @@ export default function ProfilePage() {
     queryFn: () => userService.getProfile(),
   });
 
-  const mutation = useMutation({
+  const { data: loginHistoryData, isLoading: loginHistoryLoading } = useLoginHistory({ page: 1, limit: 20 });
+
+  const profileMutation = useMutation({
     mutationFn: (data: ProfileFormData) => {
-      // Split name for compatibility
       const parts = (data.fullName || "").trim().split(/\s+/);
       const firstName = parts[0] || "";
       const lastName = parts.slice(1).join(" ") || "";
@@ -44,20 +45,20 @@ export default function ProfilePage() {
     onSuccess: (updatedProfile) => {
       queryClient.setQueryData(["profile"], updatedProfile);
       updateUser(updatedProfile);
-      addToast({ type: "success", message: "Profile credentials updated successfully!" });
+      addToast({ type: "success", message: "Profile updated successfully!" });
     },
     onError: () => {
-      addToast({ type: "error", message: "Failed to update profile settings" });
+      addToast({ type: "error", message: "Failed to update profile" });
     },
   });
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pwForm.oldPassword || !pwForm.newPassword || !pwForm.confirmNewPassword) {
-      addToast({ type: "warning", message: "Please fill in all security fields." });
+    if (!pwForm.currentPassword || !pwForm.newPassword || !pwForm.confirmPassword) {
+      addToast({ type: "warning", message: "Please fill in all password fields." });
       return;
     }
-    if (pwForm.newPassword !== pwForm.confirmNewPassword) {
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
       addToast({ type: "error", message: "New passwords do not match!" });
       return;
     }
@@ -67,11 +68,18 @@ export default function ProfilePage() {
     }
 
     setPwPending(true);
-    setTimeout(() => {
+    try {
+      await userService.changePassword({
+        currentPassword: pwForm.currentPassword,
+        newPassword: pwForm.newPassword,
+      });
+      addToast({ type: "success", message: "Password changed successfully!" });
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch {
+      addToast({ type: "error", message: "Failed to change password. Check your current password." });
+    } finally {
       setPwPending(false);
-      addToast({ type: "success", message: "Password updated successfully!" });
-      setPwForm({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
-    }, 1000);
+    }
   };
 
   if (isLoading || !profile) {
@@ -85,12 +93,7 @@ export default function ProfilePage() {
   const defaultFullName = profile.firstName ? `${profile.firstName} ${profile.lastName || ""}`.trim() : "Secure User";
   const userInitials = profile.firstName ? `${profile.firstName[0]}${profile.lastName ? profile.lastName[0] : ""}`.toUpperCase() : "SU";
 
-  // Mocked login logs for tab
-  const loginHistory = [
-    { id: 1, ipAddress: "192.168.1.1", device: "Chrome / Windows 11", status: "success", date: new Date().toISOString() },
-    { id: 2, ipAddress: "192.168.1.25", device: "Safari / iOS 17", status: "success", date: new Date(Date.now() - 3600000 * 2).toISOString() },
-    { id: 3, ipAddress: "172.16.254.1", device: "Firefox / macOS Sequoia", status: "failed", date: new Date(Date.now() - 3600000 * 18).toISOString() },
-  ];
+  const loginLogs = loginHistoryData?.data || [];
 
   return (
     <div className="space-y-6 text-left">
@@ -104,7 +107,6 @@ export default function ProfilePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* User Card */}
         <div className="space-y-6">
           <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
             <CardContent className="p-6 text-center space-y-4">
@@ -127,16 +129,18 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex items-center gap-2 text-green-500">
                   <ShieldCheck className="h-4 w-4" />
-                  <span>Security status: Strong</span>
+                  <span>Security status: Active</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Tab Navigation */}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5" role="tablist" aria-label="Profile sections">
             <button
               onClick={() => setActiveTab("profile")}
+              role="tab"
+              aria-selected={activeTab === "profile"}
+              aria-controls="panel-profile"
               className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "profile"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
@@ -148,6 +152,9 @@ export default function ProfilePage() {
             </button>
             <button
               onClick={() => setActiveTab("password")}
+              role="tab"
+              aria-selected={activeTab === "password"}
+              aria-controls="panel-password"
               className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "password"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
@@ -159,6 +166,9 @@ export default function ProfilePage() {
             </button>
             <button
               onClick={() => setActiveTab("logins")}
+              role="tab"
+              aria-selected={activeTab === "logins"}
+              aria-controls="panel-logins"
               className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-xs font-semibold tracking-wide transition-all ${
                 activeTab === "logins"
                   ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
@@ -171,38 +181,37 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Form area */}
         <div className="lg:col-span-2">
           {activeTab === "profile" && (
-            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
+            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80" role="tabpanel" id="panel-profile">
               <CardHeader className="border-b border-gray-100/50 p-5 dark:border-gray-800/50">
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Personal Information</h3>
               </CardHeader>
               <CardContent className="p-6">
                 <ProfileForm
                   user={profile}
-                  onSubmit={(data) => mutation.mutate(data)}
-                  isPending={mutation.isPending}
+                  onSubmit={(data) => profileMutation.mutate(data)}
+                  isPending={profileMutation.isPending}
                 />
               </CardContent>
             </Card>
           )}
 
           {activeTab === "password" && (
-            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
+            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80" role="tabpanel" id="panel-password">
               <CardHeader className="border-b border-gray-100/50 p-5 dark:border-gray-800/50">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">Credentials Rotation</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Password Change</h3>
               </CardHeader>
               <CardContent className="p-6">
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <PasswordInput
                     label="Current Password"
                     placeholder="Enter current password"
-                    value={pwForm.oldPassword}
-                    onChange={(e) => setPwForm({ ...pwForm, oldPassword: e.target.value })}
+                    value={pwForm.currentPassword}
+                    onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })}
                   />
                   <PasswordInput
-                    label="New Secure Password"
+                    label="New Password"
                     placeholder="Enter new password"
                     value={pwForm.newPassword}
                     onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
@@ -210,11 +219,11 @@ export default function ProfilePage() {
                   <PasswordInput
                     label="Confirm New Password"
                     placeholder="Repeat new password"
-                    value={pwForm.confirmNewPassword}
-                    onChange={(e) => setPwForm({ ...pwForm, confirmNewPassword: e.target.value })}
+                    value={pwForm.confirmPassword}
+                    onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
                   />
                   <Button type="submit" isLoading={pwPending} className="w-full h-11 rounded-xl">
-                    Update Security Credentials
+                    Update Password
                   </Button>
                 </form>
               </CardContent>
@@ -222,24 +231,33 @@ export default function ProfilePage() {
           )}
 
           {activeTab === "logins" && (
-            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
+            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80" role="tabpanel" id="panel-logins">
               <CardHeader className="border-b border-gray-100/50 p-5 dark:border-gray-800/50">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">Session Audit Trails</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Login Session Logs</h3>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-3.5">
-                  {loginHistory.map((log) => (
-                    <div key={log.id} className="flex justify-between items-center border-b border-gray-100/50 dark:border-gray-800/50 pb-3 last:border-0 last:pb-0">
-                      <div className="text-xs">
-                        <p className="font-bold text-gray-900 dark:text-white">{log.ipAddress}</p>
-                        <p className="text-gray-400 mt-0.5">{log.device} • {formatDate(log.date)}</p>
+                {loginHistoryLoading ? (
+                  <div className="flex justify-center py-6"><LoadingSpinner /></div>
+                ) : loginLogs.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-gray-400">
+                    <Clock className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                    No login activity recorded yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3.5">
+                    {loginLogs.map((log) => (
+                      <div key={log.id} className="flex justify-between items-center border-b border-gray-100/50 dark:border-gray-800/50 pb-3 last:border-0 last:pb-0">
+                        <div className="text-xs">
+                          <p className="font-bold text-gray-900 dark:text-white">{log.ipAddress}</p>
+                          <p className="text-gray-400 mt-0.5">{log.userAgent} - {formatDate(log.createdAt)}</p>
+                        </div>
+                        <Badge variant={log.success ? "success" : "danger"}>
+                          {log.success ? "Success" : "Failed"}
+                        </Badge>
                       </div>
-                      <Badge variant={log.status === "success" ? "success" : "danger"}>
-                        {log.status === "success" ? "Success" : "Failed"}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

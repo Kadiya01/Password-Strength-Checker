@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ForbiddenError } from "@/utils/ApiError";
 
+/** Express middleware that restricts access to routes based on the user's role. */
 export function authorize(...allowedRoles: string[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
