@@ -24,7 +24,6 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-      target: production
     container_name: password_checker_server
     restart: unless-stopped
     depends_on:
