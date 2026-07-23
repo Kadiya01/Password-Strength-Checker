@@ -13,8 +13,8 @@ export const checkStrengthSchema = [
 export const generateSchema = [
   body("length")
     .optional()
-    .isInt({ min: 8, max: 128 })
-    .withMessage("Length must be between 8 and 128"),
+    .isInt({ min: 8, max: 64 })
+    .withMessage("Length must be between 8 and 64"),
   body("includeUppercase")
     .optional()
     .isBoolean()
@@ -40,4 +40,17 @@ export const generateSchema = [
     .isBoolean()
     .withMessage("excludeAmbiguous must be a boolean")
     .toBoolean(),
+];
+
+export const generatePassphraseSchema = [
+  body("words")
+    .optional()
+    .isInt({ min: 4, max: 8 })
+    .withMessage("Word count must be between 4 and 8"),
+  body("separator")
+    .optional()
+    .isString()
+    .withMessage("Separator must be a string")
+    .isIn([" ", "-", "_", "number", "symbol"])
+    .withMessage("Separator must be one of: ' ' (space), '-' (hyphen), '_' (underscore), 'number', 'symbol'"),
 ];

@@ -108,9 +108,9 @@ describe("POST /api/password/generate", () => {
   it("should generate a password with maximum length", async () => {
     const res = await request(app)
       .post("/api/password/generate")
-      .send({ length: 128 });
+      .send({ length: 64 });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.password.length).toBe(128);
+    expect(res.body.data.password.length).toBe(64);
   });
 });

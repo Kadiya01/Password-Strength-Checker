@@ -120,3 +120,48 @@ export interface ScoringInput {
   hasNumbers: boolean;
   hasSymbols: boolean;
 }
+
+export interface CharacterPoolOptions {
+  uppercase: boolean;
+  lowercase: boolean;
+  numbers: boolean;
+  symbols: boolean;
+  excludeAmbiguous: boolean;
+}
+
+export interface PasswordGeneratorOptions {
+  length: number;
+  uppercase: boolean;
+  lowercase: boolean;
+  numbers: boolean;
+  symbols: boolean;
+  excludeAmbiguous: boolean;
+}
+
+export interface PassphraseGeneratorOptions {
+  words: number;
+  separator: string;
+}
+
+export interface GeneratorEntropyResult {
+  entropy: number;
+  poolSize: number;
+  searchSpace: number;
+  estimatedCrackTime: string;
+}
+
+export interface GenerateEnhancedResult {
+  password: string;
+  strength: StrengthResult;
+  entropy: number;
+  strengthLabel: string;
+  crackTime: string;
+  score: number;
+}
+
+export interface GeneratePassphraseResult {
+  passphrase: string;
+  entropy: number;
+  strength: string;
+  crackTime: string;
+}

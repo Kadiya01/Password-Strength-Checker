@@ -27,8 +27,20 @@ export const ErrorMessages = {
   PASSWORD: {
     CHECK_SUCCESS: "Password strength analyzed",
     GENERATE_SUCCESS: "Password generated",
+    PASSPHRASE_GENERATE_SUCCESS: "Passphrase generated",
     HISTORY_RETRIEVED: "Password history retrieved",
     LOG_REQUIRED: "Password is required",
+    GENERATOR: {
+      EMPTY_POOL: "Character pool is empty. Enable at least one character set.",
+      INVALID_LENGTH: "Password length must be between 8 and 64",
+      INVALID_WORD_COUNT: "Word count must be between 4 and 8",
+      INVALID_SEPARATOR: "Separator must be one of: space, hyphen, underscore, number, symbol",
+      QUALITY_NOT_MET: "Unable to generate password meeting quality threshold after multiple attempts",
+    },
+    PASSPHRASE: {
+      INVALID_WORD_COUNT: "Word count must be between 4 and 8",
+      INVALID_SEPARATOR: "Invalid separator option",
+    },
   },
   DASHBOARD: {
     STATS_RETRIEVED: "Dashboard statistics retrieved",

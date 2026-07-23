@@ -17,10 +17,19 @@ export class PasswordController {
     }
   }
 
-  async generate(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  async generate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = passwordService.generate(_req.body);
+      const result = passwordService.generate(req.body);
       ApiResponse.success(res, 200, "Password generated", result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async generatePassphrase(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = passwordService.generatePassphrase(req.body);
+      ApiResponse.success(res, 200, "Passphrase generated", result);
     } catch (error) {
       next(error);
     }

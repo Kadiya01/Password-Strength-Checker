@@ -3,7 +3,7 @@ import { passwordController } from "@/controllers/password.controller";
 import { validate } from "@/middleware/validate.middleware";
 import { authenticate } from "@/middleware/authenticate.middleware";
 import { passwordCheckRateLimiter, passwordGenerateRateLimiter } from "@/middleware/rateLimit.middleware";
-import { checkStrengthSchema, generateSchema } from "@/validators/password.validator";
+import { checkStrengthSchema, generateSchema, generatePassphraseSchema } from "@/validators/password.validator";
 
 const router = Router();
 
@@ -45,8 +45,9 @@ router.post("/check-strength", passwordCheckRateLimiter, validate(checkStrengthS
  *   post:
  *     tags: [Password]
  *     summary: Generate a secure password
- *     description: Generate a cryptographically secure password with customizable options.
+ *     description: Generate a cryptographically secure password with customizable character sets, length, and ambiguous character exclusion. Each generated password is validated against the Password Intelligence Engine and must achieve a minimum "Strong" rating.
  *     requestBody:
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
@@ -62,18 +63,54 @@ router.post("/check-strength", passwordCheckRateLimiter, validate(checkStrengthS
  *                 - type: object
  *                   properties:
  *                     data:
- *                       type: object
- *                       properties:
- *                         password:
- *                           type: string
- *                         strength:
- *                           $ref: '#/components/schemas/StrengthResult'
+ *                       $ref: '#/components/schemas/GeneratePasswordResponse'
  *       400:
- *         description: Validation failed
+ *         description: Validation failed or invalid policy
+ *       422:
+ *         description: Validation error
  *       429:
  *         description: Too many requests
  */
 router.post("/generate", passwordGenerateRateLimiter, validate(generateSchema), passwordController.generate);
+
+/**
+ * @swagger
+ * /password/generate-passphrase:
+ *   post:
+ *     tags: [Password]
+ *     summary: Generate a secure passphrase
+ *     description: Generate a cryptographically secure passphrase using randomly selected words from a curated word list. Supports configurable word count (4-8) and separator options. Uses crypto.randomInt() for word selection.
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/GeneratePassphraseRequest'
+ *     responses:
+ *       200:
+ *         description: Passphrase generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/GeneratePassphraseResponse'
+ *       400:
+ *         description: Validation failed or invalid policy
+ *       422:
+ *         description: Validation error
+ *       429:
+ *         description: Too many requests
+ */
+router.post(
+  "/generate-passphrase",
+  passwordGenerateRateLimiter,
+  validate(generatePassphraseSchema),
+  passwordController.generatePassphrase
+);
 
 /**
  * @swagger

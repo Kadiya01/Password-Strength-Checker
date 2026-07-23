@@ -130,12 +130,59 @@ const swaggerOptions: Options = {
         GenerateRequest: {
           type: "object",
           properties: {
-            length: { type: "integer", minimum: 8, maximum: 128, default: 16 },
-            includeUppercase: { type: "boolean", default: true },
-            includeLowercase: { type: "boolean", default: true },
-            includeNumbers: { type: "boolean", default: true },
-            includeSymbols: { type: "boolean", default: true },
-            excludeAmbiguous: { type: "boolean", default: false },
+            length: {
+              type: "integer",
+              minimum: 8,
+              maximum: 64,
+              default: 16,
+              description: "Password length (8-64 characters)",
+            },
+            includeUppercase: { type: "boolean", default: true, description: "Include uppercase letters (A-Z)" },
+            includeLowercase: { type: "boolean", default: true, description: "Include lowercase letters (a-z)" },
+            includeNumbers: { type: "boolean", default: true, description: "Include numbers (0-9)" },
+            includeSymbols: { type: "boolean", default: true, description: "Include symbols (!@#$%^&*)" },
+            excludeAmbiguous: { type: "boolean", default: false, description: "Exclude ambiguous characters (O, 0, I, l, 1, |)" },
+          },
+        },
+        GeneratePasswordResponse: {
+          type: "object",
+          properties: {
+            password: { type: "string", example: "F@9jLm#2PwXk7nQ$" },
+            entropy: { type: "number", example: 126.4, description: "Shannon entropy in bits" },
+            strength: { type: "string", enum: ["Strong", "Excellent"], example: "Excellent", description: "Password strength label (minimum Strong)" },
+            crackTime: { type: "string", example: "Estimated Millions of years", description: "Estimated time to crack" },
+            score: { type: "integer", minimum: 0, maximum: 100, example: 98, description: "Password strength score (0-100)" },
+            strengthResult: {
+              $ref: "#/components/schemas/StrengthResult",
+              description: "Full strength analysis details",
+            },
+          },
+        },
+        GeneratePassphraseRequest: {
+          type: "object",
+          properties: {
+            words: {
+              type: "integer",
+              minimum: 4,
+              maximum: 8,
+              default: 5,
+              description: "Number of words in the passphrase (4-8)",
+            },
+            separator: {
+              type: "string",
+              enum: [" ", "-", "_", "number", "symbol"],
+              default: "-",
+              description: "Word separator: ' ' (space), '-' (hyphen), '_' (underscore), 'number' (random digit), 'symbol' (random symbol)",
+            },
+          },
+        },
+        GeneratePassphraseResponse: {
+          type: "object",
+          properties: {
+            passphrase: { type: "string", example: "correct-horse-battery-staple-lake" },
+            entropy: { type: "number", example: 92.8, description: "Shannon entropy in bits" },
+            strength: { type: "string", example: "Strong", description: "Passphrase strength label" },
+            crackTime: { type: "string", example: "Estimated Millions of years", description: "Estimated time to crack" },
           },
         },
         UserProfile: {
@@ -156,27 +203,171 @@ const swaggerOptions: Options = {
             totalPasswordsChecked: { type: "integer" },
             averageStrength: { type: "number" },
             strengthDistribution: {
-              type: "object",
-              properties: {
-                weak: { type: "integer" },
-                fair: { type: "integer" },
-                strong: { type: "integer" },
-                veryStrong: { type: "integer" },
-              },
+              $ref: "#/components/schemas/StrengthDistribution",
             },
             recentActivity: {
               type: "array",
               items: {
+                $ref: "#/components/schemas/LoginActivity",
+              },
+            },
+            securityScore: { type: "number" },
+          },
+        },
+        StrengthDistribution: {
+          type: "object",
+          properties: {
+            weak: { type: "integer" },
+            fair: { type: "integer" },
+            strong: { type: "integer" },
+            veryStrong: { type: "integer" },
+          },
+        },
+        LoginActivity: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            ipAddress: { type: "string" },
+            userAgent: { type: "string" },
+            success: { type: "boolean" },
+            failureReason: { type: "string", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        SecurityScore: {
+          type: "object",
+          properties: {
+            overall: { type: "integer", minimum: 0, maximum: 100 },
+            factors: {
+              type: "array",
+              items: {
                 type: "object",
                 properties: {
-                  id: { type: "string" },
-                  ipAddress: { type: "string" },
-                  success: { type: "boolean" },
+                  name: { type: "string" },
+                  score: { type: "integer" },
+                  weight: { type: "number" },
+                  description: { type: "string" },
+                },
+              },
+            },
+            recommendations: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+        },
+        PasswordAnalytics: {
+          type: "object",
+          properties: {
+            totalChecked: { type: "integer" },
+            averageStrength: { type: "number" },
+            averageEntropy: { type: "number" },
+            distribution: {
+              $ref: "#/components/schemas/StrengthDistribution",
+            },
+            trendOverTime: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  date: { type: "string", format: "date" },
+                  count: { type: "integer" },
+                  averageScore: { type: "integer" },
+                },
+              },
+            },
+            topPatterns: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  pattern: { type: "string" },
+                  count: { type: "integer" },
+                  percentage: { type: "integer" },
+                },
+              },
+            },
+          },
+        },
+        SecurityEventRecord: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            eventType: { type: "string" },
+            ipAddress: { type: "string" },
+            userAgent: { type: "string" },
+            metadata: { type: "object", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        ActivityTimelineItem: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            type: { type: "string", enum: ["login", "password_check", "security_event", "registration"] },
+            description: { type: "string" },
+            ipAddress: { type: "string", nullable: true },
+            success: { type: "boolean", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        PasswordChart: {
+          type: "object",
+          properties: {
+            strengthDistribution: {
+              $ref: "#/components/schemas/ChartData",
+            },
+            strengthOverTime: {
+              $ref: "#/components/schemas/ChartData",
+            },
+            activityHeatmap: {
+              type: "object",
+              properties: {
+                hours: { type: "array", items: { type: "integer" } },
+                days: { type: "array", items: { type: "string" } },
+                data: { type: "array", items: { type: "array", items: { type: "integer" } } },
+              },
+            },
+          },
+        },
+        ChartData: {
+          type: "object",
+          properties: {
+            labels: { type: "array", items: { type: "string" } },
+            datasets: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  label: { type: "string" },
+                  data: { type: "array", items: { type: "number" } },
+                  backgroundColor: { type: "array", items: { type: "string" } },
+                  borderColor: { type: "array", items: { type: "string" } },
+                  borderWidth: { type: "integer" },
+                },
+              },
+            },
+          },
+        },
+        PasswordGenerationStats: {
+          type: "object",
+          properties: {
+            totalGenerated: { type: "integer" },
+            averageScore: { type: "integer" },
+            averageEntropy: { type: "number" },
+            strengthBreakdown: {
+              $ref: "#/components/schemas/StrengthDistribution",
+            },
+            recentGenerations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  score: { type: "integer" },
                   createdAt: { type: "string", format: "date-time" },
                 },
               },
             },
-            securityScore: { type: "number" },
           },
         },
         ForgotPasswordRequest: {
