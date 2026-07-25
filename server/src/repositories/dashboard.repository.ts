@@ -191,7 +191,7 @@ export class DashboardRepository {
             id: e.id,
             type: "security_event" as const,
             description: `Security event: ${e.eventType}`,
-            ipAddress: e.ipAddress,
+            ipAddress: e.ipAddress ?? undefined,
             createdAt: e.createdAt,
           }))
         )

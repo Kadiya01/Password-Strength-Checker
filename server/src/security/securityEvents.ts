@@ -14,7 +14,7 @@ export async function logSecurityEvent(
         eventType,
         ipAddress,
         userAgent,
-        metadata: metadata ?? undefined,
+        metadata: (metadata as unknown as Record<string, unknown>) ?? undefined,
       },
     });
   } catch (err) {
