@@ -1,19 +1,18 @@
 services:
-  mysql:
-    image: mysql:8.0
+  db:
+    image: postgres:16-alpine
     container_name: password_checker_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-password_checker}
-      MYSQL_USER: ${MYSQL_USER:-app_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-app_password}
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_password}
+      POSTGRES_DB: ${POSTGRES_DB:-password_checker}
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${DB_PORT:-5432}:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app_user}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,13 +26,13 @@ services:
     container_name: password_checker_server
     restart: unless-stopped
     depends_on:
-      mysql:
+      db:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3000
       CLIENT_URL: ${CLIENT_URL:-http://localhost}
-      DATABASE_URL: mysql://${MYSQL_USER:-app_user}:${MYSQL_PASSWORD:-app_password}@mysql:3306/${MYSQL_DATABASE:-password_checker}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app_user}:${POSTGRES_PASSWORD:-app_password}@db:5432/${POSTGRES_DB:-password_checker}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
@@ -67,4 +66,4 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
+  postgres_data:

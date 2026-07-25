@@ -1,6 +1,6 @@
 # SentinelPass - Password Strength Checker
 
-A full-stack, enterprise-grade password strength evaluation and secure generation platform built with React, TypeScript, Node.js, Express, Prisma ORM, and MySQL. Modeled on NIST SP 800-63B standards and OWASP credential handling guidelines.
+A full-stack, enterprise-grade password strength evaluation and secure generation platform built with React, TypeScript, Node.js, Express, Prisma ORM, and PostgreSQL. Modeled on NIST SP 800-63B standards and OWASP credential handling guidelines.
 
 ---
 
@@ -23,7 +23,7 @@ A full-stack, enterprise-grade password strength evaluation and secure generatio
 | Layer | Technologies |
 |---|---|
 | **Frontend** | React 19, TypeScript, Vite, Tailwind CSS v4, React Router DOM, TanStack Query, Zustand, React Hook Form, Zod, Framer Motion, Lucide React |
-| **Backend** | Node.js, Express, TypeScript, Prisma ORM, MySQL 8.0, bcrypt, JWT (access + refresh), Helmet, CORS, compression |
+| **Backend** | Node.js, Express, TypeScript, Prisma ORM, PostgreSQL, bcrypt, JWT (access + refresh), Helmet, CORS, compression |
 | **Testing** | Jest (429 tests, 33 suites), Vitest (70 tests, 10 suites), k6 load testing (8 scripts), Supertest |
 | **DevOps** | Docker, Docker Compose, GitHub Actions CI/CD, Nginx reverse proxy |
 
@@ -34,7 +34,7 @@ A full-stack, enterprise-grade password strength evaluation and secure generatio
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v18+
-- MySQL 8.0+ (or use Docker Compose)
+- PostgreSQL 16+ (or use Docker Compose)
 
 ### Option 1: Local Development
 
@@ -210,7 +210,7 @@ Full API documentation: http://localhost:3000/api/docs (Swagger UI)
 | `NODE_ENV` | `development` | Environment mode |
 | `PORT` | `3000` | Server port |
 | `CLIENT_URL` | `http://localhost:5173` | Frontend URL for CORS |
-| `DATABASE_URL` | — | MySQL connection string |
+| `DATABASE_URL` | — | PostgreSQL connection string |
 | `JWT_SECRET` | — | Access token secret (min 32 chars) |
 | `JWT_REFRESH_SECRET` | — | Refresh token secret (min 32 chars) |
 | `JWT_EXPIRES_IN` | `15m` | Access token expiry |

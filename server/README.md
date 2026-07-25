@@ -1,6 +1,6 @@
 # Password Strength Checker - Backend API
 
-Enterprise-grade Password Strength Checker with Secure Password Generation and Authentication System. Built with Node.js, Express.js, TypeScript, Prisma ORM, and MySQL 8.
+Enterprise-grade Password Strength Checker with Secure Password Generation and Authentication System. Built with Node.js, Express.js, TypeScript, Prisma ORM, and PostgreSQL.
 
 Implements NIST SP 800-63B standards and OWASP credential handling guidelines.
 
@@ -9,7 +9,7 @@ Implements NIST SP 800-63B standards and OWASP credential handling guidelines.
 - **Runtime**: Node.js 22 LTS
 - **Language**: TypeScript (strict mode)
 - **Framework**: Express.js
-- **Database**: MySQL 8
+- **Database**: PostgreSQL
 - **ORM**: Prisma ORM
 - **Authentication**: JWT (access + refresh tokens), bcrypt
 - **Validation**: express-validator
@@ -114,8 +114,8 @@ server/
 
 ### Prerequisites
 
-- Node.js 22 LTS
-- MySQL 8 (or Docker)
+- Node.js 18 LTS
+- PostgreSQL (or Docker)
 - npm
 
 ### 1. Install Dependencies
@@ -139,7 +139,7 @@ Key variables:
 |---|---|---|
 | `NODE_ENV` | Environment mode | `development` |
 | `PORT` | Server port | `3000` |
-| `DATABASE_URL` | MySQL connection string | - |
+| `DATABASE_URL` | PostgreSQL connection string | - |
 | `JWT_SECRET` | Secret for signing access tokens (min 32 chars) | - |
 | `JWT_REFRESH_SECRET` | Secret for signing refresh tokens (min 32 chars) | - |
 | `JWT_EXPIRES_IN` | Access token expiry | `15m` |
@@ -159,7 +159,7 @@ cd ..
 docker-compose up -d
 ```
 
-**Option B: Local MySQL**
+**Option B: Local PostgreSQL**
 
 Create the database manually:
 
@@ -347,7 +347,7 @@ All tables use **UUID primary keys** with automatic generation.
 
 1. Set `NODE_ENV=production` in environment
 2. Use a strong, unique `JWT_SECRET` (minimum 32 characters)
-3. Configure `DATABASE_URL` for production MySQL
+3. Configure `DATABASE_URL` for production PostgreSQL
 4. Set `CLIENT_URL` to your production frontend domain
 5. Ensure HTTPS is enabled (use reverse proxy like Nginx)
 6. Run `npx prisma migrate deploy` for database migrations

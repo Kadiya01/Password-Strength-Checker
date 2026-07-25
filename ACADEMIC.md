@@ -16,7 +16,7 @@ The system provides real-time strength analysis with six labeled strength levels
 | **Forms** | React Hook Form + Zod | Minimal re-renders, schema-based validation with TypeScript inference. |
 | **Backend** | Express + TypeScript | Mature, well-documented, extensive middleware ecosystem. |
 | **ORM** | Prisma | Type-safe database queries, automatic migration generation, schema-first approach. |
-| **Database** | MySQL 8 | ACID compliance, mature tooling, row-level indexing for performance. |
+| **Database** | PostgreSQL 16 | ACID compliance, mature tooling, row-level indexing for performance. |
 | **Auth** | JWT (access + refresh) | Stateless authentication with short-lived access tokens and HTTP-only cookie refresh tokens. |
 | **Testing** | Jest + Vitest + k6 | Unit/integration testing (Jest), frontend component testing (Vitest), load testing (k6). |
 | **Deployment** | Docker + Nginx | Containerized deployment with multi-stage builds; Nginx for static serving, gzip, caching, and reverse proxy. |
@@ -60,7 +60,7 @@ The system provides real-time strength analysis with six labeled strength levels
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Nginx     │────▶│  Express    │────▶│   MySQL 8   │
+│   Nginx     │────▶│  Express    │────▶│ PostgreSQL 16│
 │  (Port 80)  │     │  (Port 3000)│     │  (Port 3306)│
 └─────────────┘     └─────────────┘     └─────────────┘
        │                   │
@@ -74,14 +74,14 @@ The system provides real-time strength analysis with six labeled strength levels
 ### Backend Architecture (Layered)
 
 ```
-Routes → Middleware → Controllers → Services → Repositories → Prisma → MySQL
+Routes → Middleware → Controllers → Services → Repositories → Prisma → PostgreSQL
 ```
 
 Each feature (auth, user, password, dashboard) has its own controller, service, repository, routes, and validators — following the **Single Responsibility Principle**.
 
 ## Known Limitations
 
-1. **Database**: MySQL only (no PostgreSQL/SQLite support)
+1. **Database**: PostgreSQL only (no SQLite support)
 2. **Authentication**: No OAuth/social login
 3. **Email**: Email service is mocked (not connected to SMTP)
 4. **Password Check**: No breach database integration (e.g., Have I Been Pwned)

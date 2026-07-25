@@ -38,7 +38,7 @@ All notable changes to SentinelPass are documented in this file.
 
 ### Infrastructure
 - Docker multi-stage builds for client and server
-- Docker Compose orchestration with MySQL health checks
+- Docker Compose orchestration with PostgreSQL health checks
 - Nginx reverse proxy with gzip, caching, and SPA fallback
 - GitHub Actions CI/CD pipeline
 - Issue and PR templates

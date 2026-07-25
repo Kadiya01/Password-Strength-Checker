@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Docker and Docker Compose v2+
-- OR: Node.js 18+, MySQL 8.0+, Nginx (for manual deployment)
+- OR: Node.js 18+, PostgreSQL 16+, Nginx (for manual deployment)
 
 ## Option 1: Docker Deployment (Recommended)
 
@@ -37,7 +37,7 @@ docker compose up -d
 ```
 
 This starts:
-- **MySQL** on port 3306
+- **PostgreSQL** on port 5432
 - **Backend API** on port 3000
 - **Frontend (Nginx)** on port 80
 
@@ -92,5 +92,5 @@ Point your Nginx config to:
 - [ ] Swagger docs disabled or protected
 - [ ] CORS `CLIENT_URL` set to production domain
 - [ ] Rate limiting configured for production traffic
-- [ ] MySQL root password changed from default
+- [ ] PostgreSQL password changed from default
 - [ ] Server not exposing debug information
