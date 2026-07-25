@@ -22,11 +22,11 @@ RUN apk add --no-cache tini
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
 RUN npm ci --omit=dev
 RUN npx prisma generate
 
 COPY --from=builder /app/dist ./dist
-COPY prisma ./prisma/
 
 RUN addgroup -g 1001 -S appgroup && \
     adduser -S appuser -u 1001 -G appgroup
