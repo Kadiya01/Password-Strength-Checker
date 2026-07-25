@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "@/config/database.config";
 
 export async function logSecurityEvent(
@@ -14,7 +15,7 @@ export async function logSecurityEvent(
         eventType,
         ipAddress,
         userAgent,
-        metadata: (metadata as unknown as Record<string, unknown>) ?? undefined,
+        metadata: (metadata as Prisma.InputJsonValue) ?? undefined,
       },
     });
   } catch (err) {
