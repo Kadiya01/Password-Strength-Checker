@@ -59,16 +59,17 @@ The system provides real-time strength analysis with six labeled strength levels
 ## Architecture
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Nginx     │────▶│  Express    │────▶│ PostgreSQL 16│
-│  (Port 80)  │     │  (Port 3000)│     │  (Port 3306)│
-└─────────────┘     └─────────────┘     └─────────────┘
-       │                   │
-       ▼                   ▼
-┌─────────────┐     ┌─────────────┐
-│  React SPA  │     │   Prisma    │
-│  (Static)   │     │    ORM      │
-└─────────────┘     └─────────────┘
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│   Vercel CDN     │────▶│  Render (PaaS)   │────▶│  Render Postgres │
+│  React SPA       │     │  Express Backend  │     │  PostgreSQL 16   │
+│  (Port 443)      │     │  (Port 3000)      │     │  (Port 5432)     │
+└──────────────────┘     └──────────────────┘     └──────────────────┘
+        │                        │
+        ▼                        ▼
+┌──────────────────┐     ┌──────────────────┐
+│  Nginx (Docker)  │     │    Prisma ORM    │
+│  Static Serving  │     │  Type-Safe Queries│
+└──────────────────┘     └──────────────────┘
 ```
 
 ### Backend Architecture (Layered)
@@ -81,22 +82,21 @@ Each feature (auth, user, password, dashboard) has its own controller, service, 
 
 ## Known Limitations
 
-1. **Database**: PostgreSQL only (no SQLite support)
-2. **Authentication**: No OAuth/social login
-3. **Email**: Email service is mocked (not connected to SMTP)
-4. **Password Check**: No breach database integration (e.g., Have I Been Pwned)
-5. **Offline Mode**: Limited functionality when API is unreachable
-6. **Scalability**: Single-server architecture (no horizontal scaling/sharding)
-7. **Real-time**: No WebSocket support for live dashboard updates
+1. **Authentication**: No OAuth/social login
+2. **Email**: Email service is mocked (not connected to SMTP)
+3. **Password Check**: No breach database integration (e.g., Have I Been Pwned)
+4. **Offline Mode**: Limited functionality when API is unreachable
+5. **Scalability**: Single-server architecture (no horizontal scaling/sharding)
+6. **Real-time**: No WebSocket support for live dashboard updates
+7. **Cold Starts**: Render free tier sleeps after 15 min idle (30-60s wake-up)
 
 ## Future Improvements
 
 1. **Breach Integration**: Check passwords against Have I Been Pwned API
 2. **OAuth**: Google/GitHub social login
 3. **WebSocket**: Real-time dashboard updates
-4. **Multi-database**: PostgreSQL, SQLite support via Prisma
-5. **Admin Panel**: User management, system analytics
-6. **API Versioning**: `/api/v1/` prefix for backward compatibility
-7. **E2E Testing**: Playwright or Cypress integration
-8. **Observability**: Prometheus metrics, distributed tracing
-9. **CI/CD**: Automated deployment to cloud (AWS/GCP/Azure)
+4. **Admin Panel**: User management, system analytics
+5. **API Versioning**: `/api/v1/` prefix for backward compatibility
+6. **E2E Testing**: Playwright or Cypress integration
+7. **Observability**: Prometheus metrics, distributed tracing
+8. **CI/CD**: Automated deployment to cloud (AWS/GCP/Azure)

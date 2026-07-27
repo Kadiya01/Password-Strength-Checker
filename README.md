@@ -223,6 +223,22 @@ Full API documentation: http://localhost:3000/api/docs (Swagger UI)
 
 ---
 
+## Documentation
+
+| Document | Description |
+|---|---|
+| [User Manual](docs/USER_MANUAL.md) | End-user guide for all features |
+| [Admin Guide](docs/ADMIN_GUIDE.md) | System administration, monitoring, scaling |
+| [Developer Guide](docs/DEVELOPER_GUIDE.md) | Architecture, coding standards, API conventions |
+| [Deployment Guide](DEPLOYMENT.md) | Docker, Vercel, Render deployment instructions |
+| [Maintenance Guide](docs/MAINTENANCE.md) | Routine tasks, backups, releases, security patching |
+| [Troubleshooting Guide](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [Contributing Guide](CONTRIBUTING.md) | How to contribute to the project |
+| [Academic Materials](ACADEMIC.md) | Final-year project submission support |
+| [Changelog](CHANGELOG.md) | Version history and release notes |
+
+---
+
 ## License
 
 This project is for academic and portfolio demonstration purposes.

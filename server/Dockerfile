@@ -12,8 +12,11 @@ COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src/
 
 RUN npx prisma generate
-RUN npm install -g tsc-alias
-RUN npm run build && tsc-alias -p tsconfig.build.json
+
+RUN npm install -g tsc-alias && \
+    npm run build && \
+    tsc-alias -p tsconfig.build.json && \
+    echo "Build complete: TypeScript compiled with path alias resolution"
 
 # Stage 2: Production
 FROM node:20-alpine AS production

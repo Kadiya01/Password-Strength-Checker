@@ -2,6 +2,24 @@
 
 All notable changes to SentinelPass are documented in this file.
 
+## [1.1.0] - 2026-07-27
+
+### Changed
+- Migrated from MySQL to PostgreSQL for Render deployment compatibility
+- Frontend now calls Render backend directly (removed broken Vercel API proxy)
+- Dockerfile builder stage combines tsc-alias with build for reliable path alias resolution
+- Architecture diagram updated to reflect cloud deployment (Vercel + Render + PostgreSQL)
+
+### Fixed
+- Render deployment crash: `@/` path aliases now resolve correctly in production builds
+- `prisma` moved from devDependencies to dependencies (required at build time on Render)
+- PostgreSQL null handling in `dashboard.repository.ts` and `securityEvents.ts`
+
+### Added
+- Comprehensive documentation suite: User Manual, Admin Guide, Developer Guide, Maintenance Guide, Troubleshooting Guide, Contributing Guide
+- `.env.example` updated with PostgreSQL connection string format
+- `vercel.json` with SPA rewrites (API proxy removed — frontend calls Render directly)
+
 ## [1.0.0] - 2026-07-23
 
 ### Added

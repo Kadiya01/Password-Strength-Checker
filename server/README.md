@@ -6,7 +6,7 @@ Implements NIST SP 800-63B standards and OWASP credential handling guidelines.
 
 ## Tech Stack
 
-- **Runtime**: Node.js 22 LTS
+- **Runtime**: Node.js 20 LTS
 - **Language**: TypeScript (strict mode)
 - **Framework**: Express.js
 - **Database**: PostgreSQL
@@ -73,29 +73,23 @@ server/
 │   ├── services/                # Business logic layer
 │   │   ├── auth.service.ts
 │   │   ├── dashboard.service.ts
+│   │   ├── email.service.ts
 │   │   ├── hash.service.ts
 │   │   ├── password.service.ts
-│   │   ├── password-strength.service.ts  # TODO: implement
 │   │   ├── token.service.ts
-│   │   └── user.service.ts
-│   ├── tests/                   # Test suite
+│   │   ├── user.service.ts
+│   │   ├── password/             # Password Intelligence Engine (11 modules)
+│   │   └── generator/            # Password Generator (6 modules)
+│   ├── tests/                   # Test suite (429 tests, 33 suites)
 │   │   ├── helpers/
 │   │   │   ├── testApp.ts
 │   │   │   └── appInstance.ts
 │   │   ├── integration/
-│   │   │   ├── health.test.ts
-│   │   │   ├── validation.test.ts
-│   │   │   └── password.test.ts
 │   │   └── unit/
-│   │       ├── services/
-│   │       │   └── hash.service.test.ts
-│   │       └── utils/
-│   │           └── apiError.test.ts
 │   ├── utils/                   # Utility classes
 │   │   ├── ApiError.ts          # Custom error classes
 │   │   ├── ApiResponse.ts       # Standardized responses
-│   │   ├── logger.ts            # Logger utility
-│   │   └── passwordGenerator.ts # TODO: implement
+│   │   └── logger.ts            # Logger utility
 │   ├── validators/              # Validation schemas
 │   │   ├── auth.validator.ts
 │   │   ├── common.validator.ts
@@ -301,12 +295,17 @@ npm run test:watch
 
 - **Integration tests**: Full HTTP request/response cycle with supertest
   - Health endpoint
-  - Validation (register, login, forgot/reset password, password operations)
-  - Protected routes (401 without token)
-  - Password operations (strength check, generation)
+  - Authentication (register, login, logout, refresh, forgot/reset password)
+  - Password operations (strength check, generation, passphrase, history)
+  - Dashboard (stats, activity, distribution, security status, sessions)
+  - Validation and error handling
 - **Unit tests**: Individual service and utility testing
-  - Hash service (bcrypt)
-  - Custom error classes
+  - Password Intelligence Engine (11 modules): entropy, dictionary, patterns, scoring, crack time, suggestions
+  - Password Generator (6 modules): generator, passphrase, character pool, entropy, policy validation
+  - Auth service, hash service, token service, user service
+  - Security modules (account lockout, security events)
+  - Middleware (authenticate, authorize, error handler)
+  - Utility classes (ApiError, ApiResponse)
 
 ## Linting
 
