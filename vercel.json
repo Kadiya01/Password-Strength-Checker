@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://pwc-server.onrender.com/api/:path*"
+      "destination": "https://password-strength-checker-qa6b.onrender.com/api/:path*"
     },
     {
       "source": "/((?!assets/|.*\\..*).*)",
