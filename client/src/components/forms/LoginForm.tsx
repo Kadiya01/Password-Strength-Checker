@@ -22,18 +22,19 @@ export default function LoginForm() {
   });
 
   return (
-    <form onSubmit={handleSubmit((data) => login.mutate(data))} className="space-y-4 text-left">
+    <form onSubmit={handleSubmit((data) => login.mutate(data))} className="space-y-4 text-left" noValidate>
       <Input
         label="Email Address"
         type="email"
         placeholder="you@enterprise.com"
+        autoComplete="email"
         error={errors.email?.message}
         {...register("email")}
       />
 
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <label className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
+          <label htmlFor="login-password" className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
             Password
           </label>
           <a
@@ -48,7 +49,9 @@ export default function LoginForm() {
           </a>
         </div>
         <PasswordInput
+          id="login-password"
           placeholder="Enter your password"
+          autoComplete="current-password"
           error={errors.password?.message}
           showCapsLockWarning={true}
           {...register("password")}

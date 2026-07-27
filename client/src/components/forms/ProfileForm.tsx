@@ -28,10 +28,11 @@ export default function ProfileForm({ user, onSubmit, isPending }: ProfileFormPr
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left" noValidate>
       <Input
         label="Full Name"
         placeholder="First and last name"
+        autoComplete="name"
         error={errors.fullName?.message}
         {...register("fullName")}
       />
@@ -39,12 +40,14 @@ export default function ProfileForm({ user, onSubmit, isPending }: ProfileFormPr
         label="Email Address"
         type="email"
         placeholder="email@example.com"
+        autoComplete="email"
         error={errors.email?.message}
         {...register("email")}
       />
       <Input
         label="Username"
         placeholder="username"
+        autoComplete="username"
         error={errors.username?.message}
         {...register("username")}
       />

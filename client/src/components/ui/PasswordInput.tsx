@@ -1,4 +1,4 @@
-import { useState, forwardRef, useEffect } from "react";
+import { useState, forwardRef, useEffect, useId } from "react";
 import { Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { cn } from "@/utils/cn";
 
@@ -9,9 +9,11 @@ export interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputE
 }
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, label, error, showCapsLockWarning = true, ...props }, ref) => {
+  ({ className, label, error, showCapsLockWarning = true, id: idProp, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const [isCapsLockActive, setIsCapsLockActive] = useState(false);
+    const autoId = useId();
+    const id = idProp || autoId;
 
     const togglePasswordVisibility = () => {
       setShowPassword((prev) => !prev);
@@ -25,12 +27,13 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     return (
       <div className="w-full space-y-1.5 text-left">
         {label && (
-          <label htmlFor={props.id} className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
+          <label htmlFor={id} className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
             {label}
           </label>
         )}
         <div className="relative">
           <input
+            id={id}
             type={showPassword ? "text" : "password"}
             className={cn(
               "flex h-11 w-full rounded-xl border border-gray-200 bg-white/60 pl-4 pr-11 py-2 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-gray-800 dark:bg-gray-900/60 dark:focus:border-blue-500 dark:focus:bg-gray-900",

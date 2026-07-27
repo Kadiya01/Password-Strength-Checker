@@ -86,10 +86,11 @@ export default function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left" noValidate>
       <Input
         label="Full Name"
         placeholder="Jane Doe"
+        autoComplete="name"
         error={errors.fullName?.message}
         {...register("fullName")}
       />
@@ -98,6 +99,7 @@ export default function RegisterForm() {
         label="Email Address"
         type="email"
         placeholder="jane.doe@enterprise.com"
+        autoComplete="email"
         error={errors.email?.message}
         {...register("email")}
       />
@@ -105,6 +107,7 @@ export default function RegisterForm() {
       <PasswordInput
         label="Password"
         placeholder="Enter a secure password"
+        autoComplete="new-password"
         error={errors.password?.message}
         {...register("password")}
       />
@@ -140,6 +143,7 @@ export default function RegisterForm() {
       <PasswordInput
         label="Confirm Password"
         placeholder="Repeat your password"
+        autoComplete="new-password"
         error={errors.confirmPassword?.message}
         {...register("confirmPassword")}
       />
