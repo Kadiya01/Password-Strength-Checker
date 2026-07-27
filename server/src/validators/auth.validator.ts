@@ -25,11 +25,17 @@ export const registerSchema = [
   body("firstName")
     .optional()
     .trim()
+    .escape()
+    .matches(/^[a-zA-Z\s'-]+$/)
+    .withMessage("First name can only contain letters, spaces, hyphens, and apostrophes")
     .isLength({ max: 50 })
     .withMessage("First name must be at most 50 characters"),
   body("lastName")
     .optional()
     .trim()
+    .escape()
+    .matches(/^[a-zA-Z\s'-]+$/)
+    .withMessage("Last name can only contain letters, spaces, hyphens, and apostrophes")
     .isLength({ max: 50 })
     .withMessage("Last name must be at most 50 characters"),
 ];

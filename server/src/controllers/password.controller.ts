@@ -37,7 +37,12 @@ export class PasswordController {
 
   async getHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = await passwordService.getHistory(req.user!.id, req.query as { page?: string; limit?: string });
+      const userId = req.user?.id;
+      if (!userId) {
+        ApiResponse.error(res, 401, "Authentication required");
+        return;
+      }
+      const result = await passwordService.getHistory(userId, req.query as { page?: string; limit?: string });
       ApiResponse.paginated(res, result.data, result.total, result.page, result.limit);
     } catch (error) {
       next(error);

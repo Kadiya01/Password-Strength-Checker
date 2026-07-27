@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Clipboard, Shield, Check, X, Sparkles, Terminal, Info } from "lucide-react";
 import { passwordService } from "@/services/passwordService";
@@ -12,6 +12,10 @@ export default function StrengthCheckerPage() {
   const [password, setPassword] = useState("");
   const [result, setResult] = useState<PasswordAnalysisResult | null>(null);
   const debouncedPassword = useDebounce(password, 250);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useRef(
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ).current;
 
   const mutation = useMutation({
     mutationFn: (pw: string) => passwordService.checkStrength(pw),
@@ -26,6 +30,12 @@ export default function StrengthCheckerPage() {
     }
   }, [debouncedPassword]);
 
+  useEffect(() => {
+    if (result && resultsRef.current && !prefersReducedMotion) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [result, prefersReducedMotion]);
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value.slice(0, 128));
   }, []);
@@ -35,7 +45,7 @@ export default function StrengthCheckerPage() {
       const text = await navigator.clipboard.readText();
       setPassword(text.slice(0, 128));
     } catch {
-      console.warn("Unable to access clipboard. Please paste manually using Ctrl+V / Cmd+V.");
+      // Clipboard access denied - user can paste manually
     }
   };
 
@@ -143,7 +153,7 @@ export default function StrengthCheckerPage() {
           </Card>
 
           {result && (
-            <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
+            <Card ref={resultsRef} className="glass-panel border-gray-200/60 dark:border-gray-800/80" tabIndex={-1}>
               <CardContent className="p-6 space-y-6">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -160,9 +170,16 @@ export default function StrengthCheckerPage() {
                     </div>
                   </div>
 
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                  <div
+                    role="progressbar"
+                    aria-valuenow={result.score}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Password strength: ${result.strength}, score ${result.score} out of 100`}
+                    className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800"
+                  >
                     <div
-                      className={`h-full transition-all duration-500 ${getProgressBarColor(result.score)}`}
+                      className={`h-full transition-all duration-500 ${prefersReducedMotion ? "" : ""} ${getProgressBarColor(result.score)}`}
                       style={{ width: `${result.score}%` }}
                     />
                   </div>

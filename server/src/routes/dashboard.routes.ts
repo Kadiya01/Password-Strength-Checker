@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { dashboardController } from "@/controllers/dashboard.controller";
 import { authenticate } from "@/middleware/authenticate.middleware";
+import { validatePagination } from "@/validators/pagination.validator";
+import { validate } from "@/middleware/validate.middleware";
 
 const router = Router();
 
@@ -119,7 +121,7 @@ router.get("/security-score", authenticate, dashboardController.getSecurityScore
  *       401:
  *         description: Authentication required
  */
-router.get("/login-history", authenticate, dashboardController.getLoginHistory);
+router.get("/login-history", authenticate, validate(validatePagination), dashboardController.getLoginHistory);
 
 /**
  * @swagger
@@ -177,7 +179,7 @@ router.get("/login-history", authenticate, dashboardController.getLoginHistory);
  *       401:
  *         description: Authentication required
  */
-router.get("/security-events", authenticate, dashboardController.getSecurityEvents);
+router.get("/security-events", authenticate, validate(validatePagination), dashboardController.getSecurityEvents);
 
 /**
  * @swagger
@@ -236,7 +238,7 @@ router.get("/security-events", authenticate, dashboardController.getSecurityEven
  *       401:
  *         description: Authentication required
  */
-router.get("/activity-timeline", authenticate, dashboardController.getActivityTimeline);
+router.get("/activity-timeline", authenticate, validate(validatePagination), dashboardController.getActivityTimeline);
 
 /**
  * @swagger

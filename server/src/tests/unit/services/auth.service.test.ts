@@ -582,7 +582,7 @@ describe("AuthService", () => {
 
       await expect(
         authService.changePassword("user-123", { currentPassword: "Old!Pass1", newPassword: "weakpass" }, metadata),
-      ).rejects.toThrow("New password is too weak");
+      ).rejects.toThrow("Password is too weak");
     });
   });
 });

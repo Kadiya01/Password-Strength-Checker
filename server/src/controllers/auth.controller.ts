@@ -33,7 +33,6 @@ export class AuthController {
       ApiResponse.success(res, 200, "Login successful", {
         user: result.user,
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
       });
     } catch (error) {
       next(error);
@@ -58,7 +57,7 @@ export class AuthController {
 
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const token = req.cookies.refreshToken || req.body.refreshToken;
+      const token = req.cookies.refreshToken;
       if (!token) {
         ApiResponse.error(res, 401, "Refresh token required");
         return;
@@ -75,7 +74,6 @@ export class AuthController {
 
       ApiResponse.success(res, 200, "Token refreshed successfully", {
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
       });
     } catch (error) {
       next(error);
@@ -106,7 +104,12 @@ export class AuthController {
 
   async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      await authService.changePassword(req.user!.id, req.body, {
+      const userId = req.user?.id;
+      if (!userId) {
+        ApiResponse.error(res, 401, "Authentication required");
+        return;
+      }
+      await authService.changePassword(userId, req.body, {
         ipAddress: req.ip ?? "unknown",
         userAgent: req.get("user-agent") ?? "unknown",
       });
@@ -127,7 +130,12 @@ export class AuthController {
 
   async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const profile = await userService.getProfile(req.user!.id);
+      const userId = req.user?.id;
+      if (!userId) {
+        ApiResponse.error(res, 401, "Authentication required");
+        return;
+      }
+      const profile = await userService.getProfile(userId);
       ApiResponse.success(res, 200, "Profile retrieved", profile);
     } catch (error) {
       next(error);

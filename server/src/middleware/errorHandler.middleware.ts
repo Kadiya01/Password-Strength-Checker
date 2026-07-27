@@ -2,9 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError, ValidationError } from "@/utils/ApiError";
 import { ApiResponse } from "@/utils/ApiResponse";
 import { logger } from "@/utils/logger";
+import { config } from "@/config/index";
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
-  const isDev = process.env.NODE_ENV !== "production";
+  const isDev = config.NODE_ENV !== "production";
   logger.error(`${err.message}`, isDev ? err.stack : undefined);
 
   if (err instanceof ValidationError) {
@@ -24,6 +25,16 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
 
   if (err.name === "TokenExpiredError") {
     ApiResponse.error(res, 401, "Token expired");
+    return;
+  }
+
+  if (err.name === "MulterError") {
+    const multerErr = err as unknown as { code: string; message: string };
+    if (multerErr.code === "LIMIT_FILE_SIZE") {
+      ApiResponse.error(res, 413, "File too large");
+    } else {
+      ApiResponse.error(res, 400, `Upload error: ${multerErr.message}`);
+    }
     return;
   }
 

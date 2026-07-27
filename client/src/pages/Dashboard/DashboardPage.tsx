@@ -90,7 +90,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
-              <History className="h-5 w-5" />
+              <History className="h-5 w-5" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400">
-              <TrendingUp className="h-5 w-5" />
+              <TrendingUp className="h-5 w-5" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -118,7 +118,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
-              <ShieldCheck className="h-5 w-5" />
+              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               <p className="text-2xl font-extrabold text-green-500">Secure</p>
             </div>
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
-              <Shield className="h-5 w-5" />
+              <Shield className="h-5 w-5" aria-hidden="true" />
             </div>
           </CardContent>
         </Card>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               {/* SVG Circle Gauge */}
               <div className="flex flex-col items-center">
                 <div className="relative h-40 w-40">
-                  <svg className="h-full w-full -rotate-90">
+                  <svg className="h-full w-full -rotate-90" aria-hidden="true">
                     {/* Background Ring */}
                     <circle
                       cx="80"
@@ -179,6 +179,7 @@ export default function DashboardPage() {
                       Overall Score
                     </span>
                   </div>
+                  <span className="sr-only">Security score: {currentStats.securityScore} out of 100</span>
                 </div>
                 <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 text-center max-w-xs">
                   Your aggregated profile security index based on registered credentials complexity metrics.
@@ -198,7 +199,7 @@ export default function DashboardPage() {
                     <span className="text-gray-400">{dist.veryStrong} ({percentVeryStrong}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${percentVeryStrong}%` }} />
+                    <div className="h-full bg-green-500 rounded-full" style={{ width: `${percentVeryStrong}%` }} role="meter" aria-label={`Very strong passwords: ${percentVeryStrong}%`} aria-valuenow={percentVeryStrong} aria-valuemin={0} aria-valuemax={100} />
                   </div>
                 </div>
 
@@ -209,7 +210,7 @@ export default function DashboardPage() {
                     <span className="text-gray-400">{dist.strong} ({percentStrong}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${percentStrong}%` }} />
+                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${percentStrong}%` }} role="meter" aria-label={`Strong passwords: ${percentStrong}%`} aria-valuenow={percentStrong} aria-valuemin={0} aria-valuemax={100} />
                   </div>
                 </div>
 
@@ -220,7 +221,7 @@ export default function DashboardPage() {
                     <span className="text-gray-400">{dist.fair} ({percentFair}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: `${percentFair}%` }} />
+                    <div className="h-full bg-blue-500 rounded-full" style={{ width: `${percentFair}%` }} role="meter" aria-label={`Fair passwords: ${percentFair}%`} aria-valuenow={percentFair} aria-valuemin={0} aria-valuemax={100} />
                   </div>
                 </div>
 
@@ -231,7 +232,7 @@ export default function DashboardPage() {
                     <span className="text-gray-400">{dist.weak} ({percentWeak}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                    <div className="h-full bg-red-500 rounded-full" style={{ width: `${percentWeak}%` }} />
+                    <div className="h-full bg-red-500 rounded-full" style={{ width: `${percentWeak}%` }} role="meter" aria-label={`Weak passwords: ${percentWeak}%`} aria-valuenow={percentWeak} aria-valuemin={0} aria-valuemax={100} />
                   </div>
                 </div>
               </div>
@@ -251,14 +252,14 @@ export default function DashboardPage() {
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
-                  <ClipboardCheck className="h-4.5 w-4.5" />
+                  <ClipboardCheck className="h-4.5 w-4.5" aria-hidden="true" />
                 </div>
                 <div className="text-xs">
                   <h4 className="font-bold text-gray-900 dark:text-white">Strength Checker</h4>
                   <p className="text-[10px] text-gray-400">Audit your password entropy</p>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
             </Link>
 
             <Link
@@ -267,14 +268,14 @@ export default function DashboardPage() {
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
-                  <Cpu className="h-4.5 w-4.5" />
+                  <Cpu className="h-4.5 w-4.5" aria-hidden="true" />
                 </div>
                 <div className="text-xs">
                   <h4 className="font-bold text-gray-900 dark:text-white">Secure Generator</h4>
                   <p className="text-[10px] text-gray-400">CSPRNG credential creation</p>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
             </Link>
 
             <Link
@@ -283,14 +284,14 @@ export default function DashboardPage() {
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
-                  <History className="h-4.5 w-4.5" />
+                  <History className="h-4.5 w-4.5" aria-hidden="true" />
                 </div>
                 <div className="text-xs">
                   <h4 className="font-bold text-gray-900 dark:text-white">Audit History Logs</h4>
                   <p className="text-[10px] text-gray-400">Inspect historical records</p>
                 </div>
               </div>
-              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
             </Link>
           </CardContent>
         </Card>
@@ -306,7 +307,7 @@ export default function DashboardPage() {
           <CardContent className="p-5">
             {currentStats.recentActivity.length === 0 ? (
               <div className="text-center py-6 text-xs text-gray-400">
-                <Activity className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+                <Activity className="mx-auto h-8 w-8 text-gray-300 mb-2" aria-hidden="true" />
                 No login activities logged.
               </div>
             ) : (
@@ -319,7 +320,7 @@ export default function DashboardPage() {
                           ? "bg-green-50 text-green-600 dark:bg-green-950/20 dark:text-green-400"
                           : "bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400"
                       }`}>
-                        <Activity className="h-4 w-4" />
+                        <Activity className="h-4 w-4" aria-hidden="true" />
                       </div>
                       <div className="text-xs text-left">
                         <span className="font-bold text-gray-900 dark:text-white">{activity.ipAddress}</span>

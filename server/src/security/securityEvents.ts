@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import prisma from "@/config/database.config";
+import { logger } from "@/utils/logger";
 
 export async function logSecurityEvent(
   userId: string,
@@ -20,7 +21,7 @@ export async function logSecurityEvent(
     });
   } catch (err) {
     // Never crash the request flow for security logging failures
-    console.error("Failed to log security event:", err);
+    logger.error(`Failed to log security event: ${eventType}`, err);
   }
 }
 
@@ -42,6 +43,6 @@ export async function logLoginHistory(
       },
     });
   } catch (err) {
-    console.error("Failed to log login history:", err);
+    logger.error("Failed to log login history", err);
   }
 }

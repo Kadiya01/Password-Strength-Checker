@@ -48,8 +48,16 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 cyber-grid">
+      {/* Skip Navigation Link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:text-white focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
+
       {/* Top Header */}
-      <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-gray-200/80 bg-white/80 px-4 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-900/80 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-gray-200/80 bg-white/80 px-4 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-900/80 sm:px-6 lg:px-8" role="banner">
         <div className="flex items-center gap-3">
           <button
             onClick={toggleSidebar}
@@ -109,6 +117,8 @@ export default function AppLayout() {
       <div className="flex">
         {/* Sidebar - Desktop Layout */}
         <aside
+          role="complementary"
+          aria-label="Navigation sidebar"
           className={`fixed bottom-0 top-16 left-0 z-30 hidden w-64 border-r border-gray-200/80 bg-white/70 backdrop-blur-md transition-all duration-300 dark:border-gray-800/80 dark:bg-gray-900/70 lg:block ${
             sidebarOpen ? "lg:w-64" : "lg:w-20"
           }`}
@@ -216,7 +226,7 @@ export default function AppLayout() {
             sidebarOpen ? "lg:pl-64" : "lg:pl-20"
           }`}
         >
-          <main className="flex-grow p-4 sm:p-6 lg:p-8">
+          <main id="main-content" className="flex-grow p-4 sm:p-6 lg:p-8" role="main">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
