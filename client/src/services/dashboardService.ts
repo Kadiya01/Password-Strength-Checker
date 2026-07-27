@@ -67,8 +67,20 @@ export const dashboardService = {
     return data.data;
   },
 
-  async getGenerationStats(): Promise<{ totalGenerated: number; byType: { standard: number; passphrase: number } }> {
-    const { data } = await api.get<ApiResponse<{ totalGenerated: number; byType: { standard: number; passphrase: number } }>>("/dashboard/generation-stats");
+  async getGenerationStats(): Promise<{
+    totalGenerated: number;
+    averageScore: number;
+    averageEntropy: number;
+    strengthBreakdown: { weak: number; fair: number; strong: number; veryStrong: number };
+    recentGenerations: { score: number; createdAt: string }[];
+  }> {
+    const { data } = await api.get<ApiResponse<{
+      totalGenerated: number;
+      averageScore: number;
+      averageEntropy: number;
+      strengthBreakdown: { weak: number; fair: number; strong: number; veryStrong: number };
+      recentGenerations: { score: number; createdAt: string }[];
+    }>>("/dashboard/generation-stats");
     if (!data.data) throw new Error(data.message || "Failed to fetch generation stats");
     return data.data;
   },

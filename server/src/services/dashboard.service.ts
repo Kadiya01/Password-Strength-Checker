@@ -9,23 +9,26 @@ import {
 } from "@/interfaces";
 import { dashboardRepository } from "@/repositories/dashboard.repository";
 import { parsePagination } from "@/interfaces";
+import { logger } from "@/utils/logger";
 
 export class DashboardService {
   async getStatistics(userId: string): Promise<DashboardStatistics> {
-    const [totalPasswordsChecked, averageStrength, strengthDistribution, recentActivity, securityScore] =
-      await Promise.all([
-        dashboardRepository.getTotalPasswordsChecked(userId),
-        dashboardRepository.getAverageStrength(userId),
-        dashboardRepository.getStrengthDistribution(userId),
-        dashboardRepository.getRecentLogins(userId, 10),
-        dashboardRepository.getSecurityScore(userId),
-      ]);
+    const results = await Promise.allSettled([
+      dashboardRepository.getTotalPasswordsChecked(userId),
+      dashboardRepository.getAverageStrength(userId),
+      dashboardRepository.getStrengthDistribution(userId),
+      dashboardRepository.getRecentLogins(userId, 10),
+      dashboardRepository.getSecurityScore(userId),
+    ]);
+
+    const unwrap = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+      result.status === "fulfilled" ? result.value : (logger.error("Dashboard query failed", result.reason), fallback);
 
     return {
-      totalPasswordsChecked,
-      averageStrength,
-      strengthDistribution,
-      recentActivity: recentActivity.map((entry: { id: string; ipAddress: string; userAgent: string; success: boolean; failureReason: string | null; createdAt: Date }) => ({
+      totalPasswordsChecked: unwrap(results[0], 0),
+      averageStrength: unwrap(results[1], 0),
+      strengthDistribution: unwrap(results[2], { weak: 0, fair: 0, strong: 0, veryStrong: 0 }),
+      recentActivity: unwrap(results[3], []).map((entry: { id: string; ipAddress: string; userAgent: string; success: boolean; failureReason: string | null; createdAt: Date }) => ({
         id: entry.id,
         ipAddress: entry.ipAddress,
         userAgent: entry.userAgent,
@@ -33,16 +36,23 @@ export class DashboardService {
         failureReason: entry.failureReason ?? undefined,
         createdAt: entry.createdAt,
       })),
-      securityScore,
+      securityScore: unwrap(results[4], 0),
     };
   }
 
   async getSecurityScore(userId: string): Promise<SecurityScore> {
-    const [overallScore, user, recentLogins] = await Promise.all([
+    const results = await Promise.allSettled([
       dashboardRepository.getSecurityScore(userId),
       dashboardRepository.getUserById(userId),
       dashboardRepository.getRecentLogins(userId, 20),
     ]);
+
+    const unwrap = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+      result.status === "fulfilled" ? result.value : (logger.error("Security score query failed", result.reason), fallback);
+
+    const overallScore = unwrap(results[0], 50);
+    const user = unwrap(results[1], null);
+    const recentLogins = unwrap(results[2], []);
 
     const factors: SecurityScoreFactor[] = [];
     const recommendations: string[] = [];
@@ -200,13 +210,22 @@ export class DashboardService {
   }
 
   async getPasswordAnalytics(userId: string): Promise<PasswordAnalytics> {
-    const [totalChecked, averageStrength, averageEntropy, distribution, logsByDate] = await Promise.all([
+    const results = await Promise.allSettled([
       dashboardRepository.getTotalPasswordsChecked(userId),
       dashboardRepository.getAverageStrength(userId),
       dashboardRepository.getAverageEntropy(userId),
       dashboardRepository.getStrengthDistribution(userId),
       dashboardRepository.getPasswordLogsByDate(userId, 30),
     ]);
+
+    const unwrap = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+      result.status === "fulfilled" ? result.value : (logger.error("Password analytics query failed", result.reason), fallback);
+
+    const totalChecked = unwrap(results[0], 0);
+    const averageStrength = unwrap(results[1], 0);
+    const averageEntropy = unwrap(results[2], 0);
+    const distribution = unwrap(results[3], { weak: 0, fair: 0, strong: 0, veryStrong: 0 });
+    const logsByDate = unwrap(results[4], []);
 
     // Calculate trend over time (last 30 days)
     const trendOverTime = this.calculatePasswordTrend(logsByDate);

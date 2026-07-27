@@ -49,11 +49,21 @@ export class PasswordRepository {
 
     const distribution = { weak: 0, fair: 0, strong: 0, veryStrong: 0 };
     for (const log of logs) {
-      const label = log.strengthLabel.toLowerCase();
-      if (label.includes("weak")) distribution.weak += log._count.id;
-      else if (label.includes("fair")) distribution.fair += log._count.id;
-      else if (label.includes("strong") && !label.includes("very")) distribution.strong += log._count.id;
-      else if (label.includes("very")) distribution.veryStrong += log._count.id;
+      switch (log.strengthLabel) {
+        case "Very Strong":
+          distribution.veryStrong += log._count.id;
+          break;
+        case "Strong":
+          distribution.strong += log._count.id;
+          break;
+        case "Fair":
+          distribution.fair += log._count.id;
+          break;
+        case "Weak":
+        case "Very Weak":
+          distribution.weak += log._count.id;
+          break;
+      }
     }
 
     return distribution;

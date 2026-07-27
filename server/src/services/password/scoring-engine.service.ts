@@ -40,10 +40,9 @@ function passphraseBonus(length: number): number {
 }
 
 export function getStrengthLabel(score: number): string {
-  if (score >= 90) return "Excellent";
+  if (score >= 90) return "Very Strong";
   if (score >= 75) return "Strong";
-  if (score >= 60) return "Good";
-  if (score >= 40) return "Fair";
-  if (score >= 20) return "Weak";
+  if (score >= 50) return "Fair";
+  if (score >= 25) return "Weak";
   return "Very Weak";
 }

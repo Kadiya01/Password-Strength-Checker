@@ -106,7 +106,7 @@ const swaggerOptions: Options = {
           type: "object",
           properties: {
             score: { type: "integer", minimum: 0, maximum: 100, example: 92 },
-            strength: { type: "string", enum: ["Very Weak", "Weak", "Fair", "Good", "Strong", "Excellent"], example: "Strong" },
+            strength: { type: "string", enum: ["Very Weak", "Weak", "Fair", "Strong", "Very Strong"], example: "Strong" },
             entropy: { type: "number", example: 78.3 },
             crackTime: { type: "string", example: "Estimated 540 years" },
             passphrase: { type: "boolean", example: false },
@@ -149,7 +149,7 @@ const swaggerOptions: Options = {
           properties: {
             password: { type: "string", example: "F@9jLm#2PwXk7nQ$" },
             entropy: { type: "number", example: 126.4, description: "Shannon entropy in bits" },
-            strength: { type: "string", enum: ["Strong", "Excellent"], example: "Excellent", description: "Password strength label (minimum Strong)" },
+            strength: { type: "string", enum: ["Strong", "Very Strong"], example: "Very Strong", description: "Password strength label (minimum Strong)" },
             crackTime: { type: "string", example: "Estimated Millions of years", description: "Estimated time to crack" },
             score: { type: "integer", minimum: 0, maximum: 100, example: 98, description: "Password strength score (0-100)" },
             strengthResult: {

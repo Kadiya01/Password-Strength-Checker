@@ -65,24 +65,19 @@ describe("ScoringEngine", () => {
 });
 
 describe("getStrengthLabel", () => {
-  it("should return 'Very Weak' for 0-19", () => {
+  it("should return 'Very Weak' for 0-24", () => {
     expect(getStrengthLabel(0)).toBe("Very Weak");
-    expect(getStrengthLabel(19)).toBe("Very Weak");
+    expect(getStrengthLabel(24)).toBe("Very Weak");
   });
 
-  it("should return 'Weak' for 20-39", () => {
-    expect(getStrengthLabel(20)).toBe("Weak");
-    expect(getStrengthLabel(39)).toBe("Weak");
+  it("should return 'Weak' for 25-49", () => {
+    expect(getStrengthLabel(25)).toBe("Weak");
+    expect(getStrengthLabel(49)).toBe("Weak");
   });
 
-  it("should return 'Fair' for 40-59", () => {
-    expect(getStrengthLabel(40)).toBe("Fair");
-    expect(getStrengthLabel(59)).toBe("Fair");
-  });
-
-  it("should return 'Good' for 60-74", () => {
-    expect(getStrengthLabel(60)).toBe("Good");
-    expect(getStrengthLabel(74)).toBe("Good");
+  it("should return 'Fair' for 50-74", () => {
+    expect(getStrengthLabel(50)).toBe("Fair");
+    expect(getStrengthLabel(74)).toBe("Fair");
   });
 
   it("should return 'Strong' for 75-89", () => {
@@ -90,8 +85,8 @@ describe("getStrengthLabel", () => {
     expect(getStrengthLabel(89)).toBe("Strong");
   });
 
-  it("should return 'Excellent' for 90-100", () => {
-    expect(getStrengthLabel(90)).toBe("Excellent");
-    expect(getStrengthLabel(100)).toBe("Excellent");
+  it("should return 'Very Strong' for 90-100", () => {
+    expect(getStrengthLabel(90)).toBe("Very Strong");
+    expect(getStrengthLabel(100)).toBe("Very Strong");
   });
 });

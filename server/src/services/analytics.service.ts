@@ -4,14 +4,22 @@ import {
   ActivityHeatmapData,
 } from "@/interfaces";
 import { dashboardRepository } from "@/repositories/dashboard.repository";
+import { logger } from "@/utils/logger";
 
 export class AnalyticsService {
   async getChartData(userId: string): Promise<PasswordChart> {
-    const [distribution, logsByDate, loginByDate] = await Promise.all([
+    const results = await Promise.allSettled([
       dashboardRepository.getStrengthDistribution(userId),
       dashboardRepository.getPasswordLogsByDate(userId, 30),
       dashboardRepository.getLoginHistoryByDate(userId, 30),
     ]);
+
+    const unwrap = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+      result.status === "fulfilled" ? result.value : (logger.error("Chart data query failed", result.reason), fallback);
+
+    const distribution = unwrap(results[0], { weak: 0, fair: 0, strong: 0, veryStrong: 0 });
+    const logsByDate = unwrap(results[1], []);
+    const loginByDate = unwrap(results[2], []);
 
     const strengthDistribution = this.buildStrengthDistributionChart(distribution);
     const strengthOverTime = this.buildStrengthOverTimeChart(logsByDate);

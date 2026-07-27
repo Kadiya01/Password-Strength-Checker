@@ -52,12 +52,30 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
     ApiResponse.error(res, 400, "Related resource not found");
     return;
   }
-
-  if (err.name === "PrismaClientKnownRequestError") {
-    logger.error(`Prisma error: ${prismaCode}`, err.stack);
-    ApiResponse.error(res, 500, "Database error");
+  if (prismaCode === "P2009") {
+    logger.error("Prisma value underflow/out of range", err.stack);
+    ApiResponse.error(res, 400, "Invalid value provided");
     return;
   }
 
+  if (err.name === "PrismaClientKnownRequestError") {
+    logger.error(`Prisma known error: ${prismaCode}`, err.stack);
+    ApiResponse.error(res, 500, `Database error: ${prismaCode}`);
+    return;
+  }
+
+  if (err.name === "PrismaClientUnknownRequestError") {
+    logger.error("Prisma unknown error", err.stack);
+    ApiResponse.error(res, 500, "Database query error");
+    return;
+  }
+
+  if (err.name === "PrismaClientInitializationError") {
+    logger.error("Prisma connection error", err.stack);
+    ApiResponse.error(res, 503, "Database connection error");
+    return;
+  }
+
+  logger.error("Unhandled error", err.stack);
   ApiResponse.error(res, 500, "Internal server error");
 }

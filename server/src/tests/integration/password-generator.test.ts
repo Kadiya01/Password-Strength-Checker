@@ -22,7 +22,7 @@ describe("POST /api/password/generate (enhanced)", () => {
     expect(typeof res.body.data.entropy).toBe("number");
     expect(typeof res.body.data.score).toBe("number");
     expect(typeof res.body.data.crackTime).toBe("string");
-    expect(["Strong", "Excellent"]).toContain(res.body.data.strengthLabel);
+    expect(["Strong", "Very Strong"]).toContain(res.body.data.strengthLabel);
   });
 
   it("should generate a password of specified length", async () => {
