@@ -47,6 +47,17 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
     ApiResponse.error(res, 409, "A record with this value already exists");
     return;
   }
+  if (prismaCode === "P2003") {
+    logger.error("Prisma foreign key constraint violation", err.stack);
+    ApiResponse.error(res, 400, "Related resource not found");
+    return;
+  }
+
+  if (err.name === "PrismaClientKnownRequestError") {
+    logger.error(`Prisma error: ${prismaCode}`, err.stack);
+    ApiResponse.error(res, 500, "Database error");
+    return;
+  }
 
   ApiResponse.error(res, 500, "Internal server error");
 }

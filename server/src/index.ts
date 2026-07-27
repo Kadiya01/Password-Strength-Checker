@@ -2,11 +2,29 @@ import { createApp } from "./app";
 import { config } from "@/config";
 import { logger } from "@/utils/logger";
 import prisma from "@/config/database.config";
+import { RoleName } from "@prisma/client";
+
+async function seedRoles(): Promise<void> {
+  const roles = [
+    { name: RoleName.USER, description: "Standard user role" },
+    { name: RoleName.ADMIN, description: "Administrator role" },
+  ];
+  for (const role of roles) {
+    await prisma.role.upsert({
+      where: { name: role.name },
+      update: {},
+      create: role,
+    });
+  }
+  logger.info("Roles seeded successfully");
+}
 
 async function bootstrap(): Promise<void> {
   try {
     await prisma.$connect();
     logger.info("Database connected successfully");
+
+    await seedRoles();
 
     const app = createApp();
 
