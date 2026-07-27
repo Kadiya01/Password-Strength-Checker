@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, X, ShieldAlert, Clock, BarChart } from "lucide-react";
@@ -9,7 +10,10 @@ import PasswordInput from "@/components/ui/PasswordInput";
 import { calculateLocalStrength } from "@/services/passwordService";
 
 
+const MIN_BACKEND_SCORE = 40;
+
 export default function RegisterForm() {
+  const [serverError, setServerError] = useState<string | null>(null);
   const registerUser = useRegister();
   const {
     register,
@@ -33,6 +37,7 @@ export default function RegisterForm() {
   // Live strength analysis
   const strength = calculateLocalStrength(passwordVal);
   const showStats = passwordVal.length > 0;
+  const isTooWeak = passwordVal.length > 0 && strength.score < MIN_BACKEND_SCORE;
 
   // Checklist items
   const checks = [
@@ -41,6 +46,7 @@ export default function RegisterForm() {
     { label: "At least one lowercase letter (a-z)", met: /[a-z]/.test(passwordVal) },
     { label: "At least one number (0-9)", met: /[0-9]/.test(passwordVal) },
     { label: "At least one special character", met: /[^A-Za-z0-9]/.test(passwordVal) },
+    { label: "Sufficient strength (avoid common words)", met: !isTooWeak },
     { label: "Passwords match", met: passwordVal.length > 0 && passwordVal === confirmPasswordVal },
   ];
 
@@ -71,18 +77,25 @@ export default function RegisterForm() {
   };
 
   const onSubmit = (data: RegisterFormData) => {
-    // Map fullName into firstName and lastName for API compat
+    setServerError(null);
     const parts = data.fullName.trim().split(/\s+/);
     const firstName = parts[0];
     const lastName = parts.slice(1).join(" ");
     
-    registerUser.mutate({
-      email: data.email,
-      username: data.email.split("@")[0] + "_" + Math.floor(Math.random() * 1000),
-      password: data.password,
-      firstName,
-      lastName,
-    });
+    registerUser.mutate(
+      {
+        email: data.email,
+        username: data.email.split("@")[0] + "_" + Math.floor(Math.random() * 1000),
+        password: data.password,
+        firstName,
+        lastName,
+      },
+      {
+        onError: (error: Error & { response?: { data?: { message?: string } } }) => {
+          setServerError(error.response?.data?.message || "Registration failed. Please try again.");
+        },
+      },
+    );
   };
 
   return (
@@ -173,6 +186,14 @@ export default function RegisterForm() {
         </div>
       </div>
 
+      {/* Server Error */}
+      {serverError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+          <ShieldAlert className="mr-1.5 inline h-3.5 w-3.5" />
+          {serverError}
+        </div>
+      )}
+
       {/* Terms Checkbox */}
       <div className="space-y-1">
         <label className="flex items-start gap-2.5">
@@ -188,7 +209,7 @@ export default function RegisterForm() {
         {errors.terms && <p className="text-[11px] font-medium text-red-600 dark:text-red-500">{errors.terms.message}</p>}
       </div>
 
-      <Button type="submit" isLoading={registerUser.isPending} className="w-full h-11 rounded-xl">
+      <Button type="submit" isLoading={registerUser.isPending} disabled={isTooWeak} className="w-full h-11 rounded-xl">
         Create Sentinel Account
       </Button>
     </form>
