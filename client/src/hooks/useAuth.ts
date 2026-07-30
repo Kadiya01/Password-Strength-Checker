@@ -5,6 +5,35 @@ import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
 import type { LoginFormData } from "@/utils/validators";
 
+export function useForgotPassword() {
+  const { addToast } = useUiStore();
+
+  return useMutation({
+    mutationFn: (email: string) => authService.forgotPassword(email),
+    onSuccess: () => {
+      addToast({ type: "success", message: "If that email exists, a reset link has been sent." });
+    },
+    onError: (error: Error) => {
+      addToast({ type: "error", message: error.message || "Failed to send reset email" });
+    },
+  });
+}
+
+export function useResetPassword() {
+  const { addToast } = useUiStore();
+
+  return useMutation({
+    mutationFn: (payload: { token: string; newPassword: string }) =>
+      authService.resetPassword(payload.token, payload.newPassword),
+    onSuccess: () => {
+      addToast({ type: "success", message: "Password reset successfully! Please sign in." });
+    },
+    onError: (error: Error) => {
+      addToast({ type: "error", message: error.message || "Failed to reset password" });
+    },
+  });
+}
+
 export function useLogin() {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();

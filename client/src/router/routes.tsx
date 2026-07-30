@@ -10,6 +10,8 @@ import Skeleton from "@/components/ui/Skeleton";
 const LandingPage = lazy(() => import("@/pages/Landing/LandingPage"));
 const LoginPage = lazy(() => import("@/pages/Auth/Login/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/Auth/Register/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("@/pages/Auth/ForgotPassword/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("@/pages/Auth/ResetPassword/ResetPasswordPage"));
 const DashboardPage = lazy(() => import("@/pages/Dashboard/DashboardPage"));
 const StrengthCheckerPage = lazy(() => import("@/pages/StrengthChecker/StrengthCheckerPage"));
 const PasswordGeneratorPage = lazy(() => import("@/pages/PasswordGenerator/PasswordGeneratorPage"));
@@ -77,6 +79,22 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<PageLoader />}>
                 <RegisterPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "/forgot-password",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <ForgotPasswordPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "/reset-password",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <ResetPasswordPage />
               </Suspense>
             ),
           },

@@ -216,8 +216,7 @@ export class AuthService {
 
     await authRepository.createResetToken(user.id, resetToken, expiresAt);
 
-    // TODO: Send reset email with token in production
-    // await emailService.sendPasswordReset(user.email, resetToken);
+    await emailService.sendPasswordResetEmail(user.email, resetToken);
   }
 
   async resetPassword(input: ResetPasswordInput): Promise<void> {

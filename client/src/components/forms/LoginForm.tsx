@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "react-router-dom";
 import { loginSchema, type LoginFormData } from "@/utils/validators";
 import { useLogin } from "@/hooks/useAuth";
 import Button from "@/components/ui/Button";
@@ -37,16 +38,12 @@ export default function LoginForm() {
           <label htmlFor="login-password" className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
             Password
           </label>
-          <a
-            href="#forgot-password"
-            onClick={(e) => {
-              e.preventDefault();
-              console.warn("Password recovery email has been simulated. Check console logs.");
-            }}
+          <Link
+            to="/forgot-password"
             className="text-[11px] font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Forgot password?
-          </a>
+          </Link>
         </div>
         <PasswordInput
           id="login-password"

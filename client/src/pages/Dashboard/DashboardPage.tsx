@@ -22,13 +22,38 @@ import Badge from "@/components/ui/Badge";
 import { formatDate } from "@/utils/formatters";
 
 export default function DashboardPage() {
-  const { data: stats, isLoading, refetch } = useDashboard();
+  const { data: stats, isLoading, error, refetch } = useDashboard();
   const [activeTip, setActiveTip] = useState(0);
 
   if (isLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 text-left">
+        <PageHeader
+          title="Security Overview"
+          description="Monitor account health and recent password activity metrics."
+        />
+        <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20">
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="mx-auto h-8 w-8 text-red-400 mb-2" />
+            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+              Failed to load dashboard: {(error as Error).message}
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-3 text-xs font-semibold text-red-600 underline hover:no-underline dark:text-red-400"
+            >
+              Try again
+            </button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

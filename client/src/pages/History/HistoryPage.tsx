@@ -14,7 +14,7 @@ import type { PasswordLog } from "@/types/password.types";
 export default function HistoryPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const { data, isLoading, refetch } = usePasswordHistory(page, 10);
+  const { data, isLoading, error, refetch } = usePasswordHistory(page, 10);
   const { addToast } = useUiStore();
 
   const handleClearHistory = () => {
@@ -63,6 +63,34 @@ export default function HistoryPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 text-left">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight dark:text-white sm:text-3xl">
+            Password Audit Log
+          </h1>
+          <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+            Export and inspect historical evaluation metrics.
+          </p>
+        </div>
+        <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/20">
+          <CardContent className="p-6 text-center">
+            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+              Failed to load history: {(error as Error).message}
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-3 text-xs font-semibold text-red-600 underline hover:no-underline dark:text-red-400"
+            >
+              Try again
+            </button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
