@@ -8,18 +8,10 @@ export function getEstimatedCrackTime(entropy: number): string {
   return 'Heat death of the universe';
 }
 
-export function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-500';
-  if (score >= 60) return 'text-blue-500';
-  if (score >= 40) return 'text-yellow-500';
-  if (score >= 20) return 'text-orange-500';
-  return 'text-red-500';
-}
-
 export function getProgressColor(score: number): string {
-  if (score >= 80) return 'bg-green-500';
-  if (score >= 60) return 'bg-blue-500';
-  if (score >= 40) return 'bg-yellow-500';
-  if (score >= 20) return 'bg-orange-500';
+  if (score >= 90) return 'bg-emerald-500';
+  if (score >= 75) return 'bg-green-500';
+  if (score >= 50) return 'bg-blue-500';
+  if (score >= 25) return 'bg-yellow-500';
   return 'bg-red-500';
 }

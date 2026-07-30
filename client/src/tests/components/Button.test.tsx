@@ -40,7 +40,7 @@ describe("Button", () => {
 
   it("should apply size classes", () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
-    expect(screen.getByRole("button").className).toContain("text-sm");
+    expect(screen.getByRole("button").className).toContain("text-xs");
 
     rerender(<Button size="lg">Large</Button>);
     expect(screen.getByRole("button").className).toContain("text-base");

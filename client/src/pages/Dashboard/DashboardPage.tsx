@@ -220,7 +220,7 @@ export default function DashboardPage() {
                 {/* Very Strong */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold">Excellent (&gt;90)</span>
+                    <span className="font-semibold">Very Strong (≥90)</span>
                     <span className="text-gray-400">{dist.veryStrong} ({percentVeryStrong}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
@@ -242,7 +242,7 @@ export default function DashboardPage() {
                 {/* Fair */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold">Fair (45-74)</span>
+                    <span className="font-semibold">Fair (50-74)</span>
                     <span className="text-gray-400">{dist.fair} ({percentFair}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
@@ -253,7 +253,7 @@ export default function DashboardPage() {
                 {/* Weak */}
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold">Weak (&lt;45)</span>
+                    <span className="font-semibold">Weak (&lt;50)</span>
                     <span className="text-gray-400">{dist.weak} ({percentWeak}%)</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">

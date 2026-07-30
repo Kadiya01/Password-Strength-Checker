@@ -168,7 +168,8 @@ export default function HistoryPage() {
         </Card>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/50">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/50">
             <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-800">
               <thead className="bg-gray-50/50 dark:bg-gray-900/80">
                 <tr>
@@ -190,7 +191,7 @@ export default function HistoryPage() {
                       <span className={getStrengthColor(log.strengthScore)}>{log.strengthScore}/100</span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <Badge variant={log.strengthScore >= 75 ? "success" : log.strengthScore >= 45 ? "warning" : "danger"}>
+                      <Badge variant={log.strengthScore >= 75 ? "success" : log.strengthScore >= 50 ? "warning" : "danger"}>
                         {log.strengthLabel}
                       </Badge>
                     </td>
@@ -212,6 +213,37 @@ export default function HistoryPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {filteredLogs.map((log: PasswordLog) => (
+              <Card key={log.id} className="glass-panel border-gray-200/60 dark:border-gray-800/80">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(log.createdAt)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-black ${getStrengthColor(log.strengthScore)}`}>
+                        {log.strengthScore}/100
+                      </span>
+                      <Badge variant={log.strengthScore >= 75 ? "success" : log.strengthScore >= 50 ? "warning" : "danger"}>
+                        {log.strengthLabel}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Entropy: <b>{Math.round(log.entropy)} bits</b></span>
+                    <span>Crack: <b>{getEstimatedCrackTime(log.entropy)}</b></span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {log.hasUppercase && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">A-Z</span>}
+                    {log.hasLowercase && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">a-z</span>}
+                    {log.hasNumbers && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">0-9</span>}
+                    {log.hasSymbols && <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">!@#</span>}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {totalPages > 1 && (

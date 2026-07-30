@@ -11,7 +11,8 @@ import Button from "@/components/ui/Button";
 import PasswordInput from "@/components/ui/PasswordInput";
 import Badge from "@/components/ui/Badge";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
-import { formatDate } from "@/utils/formatters";
+import { formatDate, getGradientBarColor } from "@/utils/formatters";
+import { calculateLocalStrength } from "@/services/passwordService";
 import type { ProfileFormData } from "@/utils/validators";
 
 export default function ProfilePage() {
@@ -216,12 +217,59 @@ export default function ProfilePage() {
                     value={pwForm.newPassword}
                     onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
                   />
+                  {pwForm.newPassword.length > 0 && (
+                    <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 dark:border-gray-800 dark:bg-gray-900/30">
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Strength: {calculateLocalStrength(pwForm.newPassword).label}
+                        </span>
+                        <span className="text-blue-600 dark:text-blue-400">
+                          {calculateLocalStrength(pwForm.newPassword).score}/100
+                        </span>
+                      </div>
+                      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                        <div
+                          className={`h-full transition-all duration-300 ${getGradientBarColor(calculateLocalStrength(pwForm.newPassword).score)}`}
+                          style={{ width: `${calculateLocalStrength(pwForm.newPassword).score}%` }}
+                        />
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                        <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                          <span>Entropy: <b>{Math.round(calculateLocalStrength(pwForm.newPassword).details.entropy)} bits</b></span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                          <span>Length: <b>{pwForm.newPassword.length} chars</b></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <PasswordInput
                     label="Confirm New Password"
                     placeholder="Repeat new password"
                     value={pwForm.confirmPassword}
                     onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
                   />
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                    {[
+                      { label: "Min 8 characters", met: pwForm.newPassword.length >= 8 },
+                      { label: "Uppercase letter", met: /[A-Z]/.test(pwForm.newPassword) },
+                      { label: "Lowercase letter", met: /[a-z]/.test(pwForm.newPassword) },
+                      { label: "Number", met: /[0-9]/.test(pwForm.newPassword) },
+                      { label: "Special character", met: /[^A-Za-z0-9]/.test(pwForm.newPassword) },
+                      { label: "Passwords match", met: pwForm.newPassword.length > 0 && pwForm.newPassword === pwForm.confirmPassword },
+                    ].map((c) => (
+                      <div key={c.label} className="flex items-center gap-1.5 text-[11px]">
+                        {c.met ? (
+                          <span className="text-green-500">✓</span>
+                        ) : (
+                          <span className="text-gray-300 dark:text-gray-700">✗</span>
+                        )}
+                        <span className={c.met ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}>
+                          {c.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                   <Button type="submit" isLoading={pwPending} className="w-full h-11 rounded-xl">
                     Update Password
                   </Button>

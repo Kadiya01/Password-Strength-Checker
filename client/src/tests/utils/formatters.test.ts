@@ -17,23 +17,23 @@ describe("formatDate", () => {
 });
 
 describe("getStrengthColor", () => {
-  it("should return emerald for score >= 91", () => {
+  it("should return emerald for score >= 90", () => {
     expect(getStrengthColor(95)).toContain("emerald");
   });
 
-  it("should return green for score 76-90", () => {
+  it("should return green for score 75-89", () => {
     expect(getStrengthColor(80)).toContain("green");
   });
 
-  it("should return yellow for score 51-75", () => {
+  it("should return yellow for score 50-74", () => {
     expect(getStrengthColor(60)).toContain("yellow");
   });
 
-  it("should return orange for score 26-50", () => {
+  it("should return orange for score 25-49", () => {
     expect(getStrengthColor(35)).toContain("orange");
   });
 
-  it("should return red for score < 26", () => {
+  it("should return red for score < 25", () => {
     expect(getStrengthColor(10)).toContain("red");
   });
 });

@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import PasswordInput from "@/components/ui/PasswordInput";
 import Card, { CardContent } from "@/components/ui/Card";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getGradientBarColor } from "@/utils/formatters";
 import type { PasswordAnalysisResult } from "@/types/password.types";
 
 export default function StrengthCheckerPage() {
@@ -81,19 +82,9 @@ export default function StrengthCheckerPage() {
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-emerald-500 border-emerald-500/20 bg-emerald-500/5";
     if (score >= 75) return "text-green-500 border-green-500/20 bg-green-500/5";
-    if (score >= 60) return "text-blue-500 border-blue-500/20 bg-blue-500/5";
-    if (score >= 40) return "text-yellow-500 border-yellow-500/20 bg-yellow-500/5";
-    if (score >= 20) return "text-orange-500 border-orange-500/20 bg-orange-500/5";
+    if (score >= 50) return "text-blue-500 border-blue-500/20 bg-blue-500/5";
+    if (score >= 25) return "text-yellow-500 border-yellow-500/20 bg-yellow-500/5";
     return "text-red-500 border-red-500/20 bg-red-500/5";
-  };
-
-  const getProgressBarColor = (score: number) => {
-    if (score >= 90) return "bg-gradient-to-r from-emerald-500 to-teal-400";
-    if (score >= 75) return "bg-gradient-to-r from-green-500 to-emerald-400";
-    if (score >= 60) return "bg-gradient-to-r from-blue-600 to-blue-400";
-    if (score >= 40) return "bg-gradient-to-r from-yellow-500 to-orange-400";
-    if (score >= 20) return "bg-gradient-to-r from-orange-500 to-red-400";
-    return "bg-gradient-to-r from-red-600 to-red-400";
   };
 
   return (
@@ -179,7 +170,7 @@ export default function StrengthCheckerPage() {
                     className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800"
                   >
                     <div
-                      className={`h-full transition-all duration-500 ${prefersReducedMotion ? "" : ""} ${getProgressBarColor(result.score)}`}
+                      className={`h-full transition-all duration-500 ${prefersReducedMotion ? "" : ""} ${getGradientBarColor(result.score)}`}
                       style={{ width: `${result.score}%` }}
                     />
                   </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   ShieldCheck,
@@ -293,11 +293,24 @@ export default function LandingPage() {
                   <span>{faq.q}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                 </button>
-                {isOpen && (
-                  <div id={`faq-answer-${idx}`} role="region" className="border-t border-gray-100 bg-white/20 px-5 py-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
-                    {faq.a}
-                  </div>
-                )}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      id={`faq-answer-${idx}`}
+                      key="faq-answer"
+                      role="region"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="border-t border-gray-100 bg-white/20 px-5 py-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
