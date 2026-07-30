@@ -76,6 +76,6 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
     return;
   }
 
-  logger.error("Unhandled error", err.stack);
-  ApiResponse.error(res, 500, "Internal server error");
+  logger.error("Unhandled error", { name: err.name, message: err.message, stack: err.stack });
+  ApiResponse.error(res, 500, `[${err.name}] ${err.message?.slice(0, 200)}`);
 }
