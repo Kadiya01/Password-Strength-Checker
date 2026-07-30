@@ -30,7 +30,7 @@ const router = Router();
  *       401:
  *         description: Authentication required
  */
-router.get("/statistics", authenticate, dashboardController.getStatistics);
+router.get("/statistics", authenticate, (req, res, next) => dashboardController.getStatistics(req, res, next));
 
 /**
  * @swagger
@@ -56,7 +56,7 @@ router.get("/statistics", authenticate, dashboardController.getStatistics);
  *       401:
  *         description: Authentication required
  */
-router.get("/security-score", authenticate, dashboardController.getSecurityScore);
+router.get("/security-score", authenticate, (req, res, next) => dashboardController.getSecurityScore(req, res, next));
 
 /**
  * @swagger
@@ -121,7 +121,7 @@ router.get("/security-score", authenticate, dashboardController.getSecurityScore
  *       401:
  *         description: Authentication required
  */
-router.get("/login-history", authenticate, validate(validatePagination), dashboardController.getLoginHistory);
+router.get("/login-history", authenticate, validate(validatePagination), (req, res, next) => dashboardController.getLoginHistory(req, res, next));
 
 /**
  * @swagger
@@ -179,7 +179,7 @@ router.get("/login-history", authenticate, validate(validatePagination), dashboa
  *       401:
  *         description: Authentication required
  */
-router.get("/security-events", authenticate, validate(validatePagination), dashboardController.getSecurityEvents);
+router.get("/security-events", authenticate, validate(validatePagination), (req, res, next) => dashboardController.getSecurityEvents(req, res, next));
 
 /**
  * @swagger
@@ -238,7 +238,7 @@ router.get("/security-events", authenticate, validate(validatePagination), dashb
  *       401:
  *         description: Authentication required
  */
-router.get("/activity-timeline", authenticate, validate(validatePagination), dashboardController.getActivityTimeline);
+router.get("/activity-timeline", authenticate, validate(validatePagination), (req, res, next) => dashboardController.getActivityTimeline(req, res, next));
 
 /**
  * @swagger
@@ -264,7 +264,7 @@ router.get("/activity-timeline", authenticate, validate(validatePagination), das
  *       401:
  *         description: Authentication required
  */
-router.get("/password-analytics", authenticate, dashboardController.getPasswordAnalytics);
+router.get("/password-analytics", authenticate, (req, res, next) => dashboardController.getPasswordAnalytics(req, res, next));
 
 /**
  * @swagger
@@ -290,7 +290,7 @@ router.get("/password-analytics", authenticate, dashboardController.getPasswordA
  *       401:
  *         description: Authentication required
  */
-router.get("/chart-data", authenticate, dashboardController.getChartData);
+router.get("/chart-data", authenticate, (req, res, next) => dashboardController.getChartData(req, res, next));
 
 /**
  * @swagger
@@ -316,7 +316,7 @@ router.get("/chart-data", authenticate, dashboardController.getChartData);
  *       401:
  *         description: Authentication required
  */
-router.get("/generation-stats", authenticate, dashboardController.getPasswordGenerationStats);
+router.get("/generation-stats", authenticate, (req, res, next) => dashboardController.getPasswordGenerationStats(req, res, next));
 
 /**
  * @swagger
@@ -367,6 +367,6 @@ router.get("/generation-stats", authenticate, dashboardController.getPasswordGen
  *       401:
  *         description: Authentication required
  */
-router.get("/export", authenticate, dashboardController.exportData);
+router.get("/export", authenticate, (req, res, next) => dashboardController.exportData(req, res, next));
 
 export default router;
