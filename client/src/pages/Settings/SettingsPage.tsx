@@ -4,6 +4,7 @@ import { useLogout } from "@/hooks/useAuth";
 import { useUiStore } from "@/store/uiStore";
 import Card, { CardHeader, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 import { Shield, AlertTriangle, Bell, Eye, EyeOff, Moon, Sun, Trash } from "lucide-react";
 
 export default function SettingsPage() {
@@ -202,12 +203,12 @@ export default function SettingsPage() {
               All credentials data logs, profile settings, and evaluation logs will be permanently deleted.
               Type <b className="text-red-600 font-mono">DELETE</b> below to confirm account deletion.
             </p>
-            <input
+            <Input
               type="text"
               placeholder="Type DELETE here..."
               value={deleteConfirmedText}
               onChange={(e) => setDeleteConfirmedText(e.target.value)}
-              className="h-10 w-full rounded-xl border border-gray-200 bg-white/50 px-3 text-xs placeholder:text-gray-400 focus:border-red-500 focus:outline-none dark:border-gray-800 dark:bg-gray-900/50 mb-4"
+              className="focus:border-red-500 dark:focus:border-red-500 mb-4"
             />
             <div className="flex justify-end gap-2.5">
               <Button

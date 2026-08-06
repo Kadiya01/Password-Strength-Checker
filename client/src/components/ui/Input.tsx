@@ -4,33 +4,42 @@ import { cn } from "@/utils/cn";
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  leftIcon?: React.ReactNode;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, id: idProp, ...props }, ref) => {
+  ({ className, label, error, leftIcon, id: idProp, ...props }, ref) => {
     const autoId = useId();
     const id = idProp || autoId;
 
     return (
-      <div className="w-full">
+      <div className="w-full space-y-1.5 text-left">
         {label && (
-          <label htmlFor={id} className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor={id} className="text-xs font-semibold tracking-wide text-gray-700 dark:text-gray-300">
             {label}
           </label>
         )}
-        <input
-          ref={ref}
-          id={id}
-          className={cn(
-            "w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400",
-            "focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
-            "disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-50",
-            error && "border-red-500 focus:border-red-500 focus:ring-red-500/20",
-            className
+        <div className="relative">
+          {leftIcon && (
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              {leftIcon}
+            </span>
           )}
-          {...props}
-        />
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+          <input
+            ref={ref}
+            id={id}
+            className={cn(
+              "flex h-11 w-full rounded-xl border border-gray-200 bg-white/60 px-4 py-2 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+              "disabled:cursor-not-allowed disabled:bg-gray-50 disabled:opacity-50",
+              "dark:border-gray-800 dark:bg-gray-900/60 dark:focus:border-blue-500 dark:focus:bg-gray-900 dark:focus:ring-blue-500/30 dark:disabled:bg-gray-900",
+              error && "border-red-500 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500 dark:focus:border-red-500 dark:focus:ring-red-500/30",
+              leftIcon && "pl-10",
+              className
+            )}
+            {...props}
+          />
+        </div>
+        {error && <p className="text-[11px] font-medium text-red-600 dark:text-red-500">{error}</p>}
       </div>
     );
   }

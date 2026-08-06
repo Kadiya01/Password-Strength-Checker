@@ -3,6 +3,7 @@ import { Download, Search, ChevronLeft, ChevronRight, History, Trash2 } from "lu
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import Button from "@/components/ui/Button";
 import Card, { CardContent } from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 import { usePasswordHistory } from "@/hooks/usePasswordHistory";
 import { useUiStore } from "@/store/uiStore";
@@ -141,18 +142,15 @@ export default function HistoryPage() {
 
       <Card className="glass-panel border-gray-200/60 dark:border-gray-800/80">
         <CardContent className="p-4">
-          <label htmlFor="history-search" className="sr-only">Search password history</label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              id="history-search"
-              type="text"
-              placeholder="Search by strength label or scores..."
-              value={search}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-              className="h-10 w-full rounded-xl border border-gray-200 bg-white/50 pl-10 pr-4 text-xs placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-800 dark:bg-gray-900/50"
-            />
-          </div>
+          <Input
+            id="history-search"
+            type="text"
+            leftIcon={<Search className="h-4 w-4" />}
+            placeholder="Search by strength label or scores..."
+            aria-label="Search password history"
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+          />
         </CardContent>
       </Card>
 
